@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Car, Plus, Pencil, Trash2 } from "lucide-react";
+import ImageUpload from "@/components/ui/image-upload";
 
 interface CarBrand {
   id: string;
@@ -370,16 +371,15 @@ const AdminCarModels = () => {
                       />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="image-url">Image URL</Label>
-                    <Input
-                      id="image-url"
-                      value={modelFormData.image_url}
-                      onChange={(e) =>
-                        setModelFormData({ ...modelFormData, image_url: e.target.value })
-                      }
-                    />
-                  </div>
+                  <ImageUpload
+                    value={modelFormData.image_url || null}
+                    onChange={(url) =>
+                      setModelFormData({ ...modelFormData, image_url: url || "" })
+                    }
+                    bucket="car-model-images"
+                    folder="models"
+                    label="Model Image"
+                  />
                   <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={resetModelForm}>
                       Cancel
