@@ -239,10 +239,16 @@ const Cart = () => {
                                   size="icon"
                                   className="h-8 w-8"
                                   onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                                  disabled={item.quantity >= item.product.stock}
                                 >
                                   <Plus className="h-4 w-4" />
                                 </Button>
                               </div>
+
+                              {/* Stock info */}
+                              {item.quantity >= item.product.stock && (
+                                <span className="text-xs text-muted-foreground">Max qty</span>
+                              )}
 
                               {/* Price & Remove */}
                               <div className="flex items-center gap-4">
