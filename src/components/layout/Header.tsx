@@ -76,12 +76,14 @@ const Header = () => {
 
             {user ? (
               <div className="hidden md:flex items-center gap-2">
-                <Link to="/my-orders">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Package className="h-4 w-4" />
-                    My Orders
-                  </Button>
-                </Link>
+                {role === "customer" && (
+                  <Link to="/my-orders">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <Package className="h-4 w-4" />
+                      My Orders
+                    </Button>
+                  </Link>
+                )}
                 {(role === "seller" || role === "admin") && (
                   <Link to="/seller">
                     <Button variant="ghost" size="sm" className="gap-2">
@@ -141,12 +143,14 @@ const Header = () => {
               ))}
               {user ? (
                 <>
-                  <Link to="/my-orders" onClick={() => setIsOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Package className="h-4 w-4 mr-2" />
-                      My Orders
-                    </Button>
-                  </Link>
+                  {role === "customer" && (
+                    <Link to="/my-orders" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Package className="h-4 w-4 mr-2" />
+                        My Orders
+                      </Button>
+                    </Link>
+                  )}
                   <Button variant="outline" className="w-full mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
