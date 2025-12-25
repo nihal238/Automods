@@ -159,6 +159,41 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          status: Database["public"]["Enums"]["order_status_phase"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          status: Database["public"]["Enums"]["order_status_phase"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          status?: Database["public"]["Enums"]["order_status_phase"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -390,6 +425,20 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "customer" | "seller"
+      order_status_phase:
+        | "order_placed"
+        | "payment_pending"
+        | "payment_confirmed"
+        | "order_confirmed"
+        | "processing"
+        | "packed"
+        | "shipped"
+        | "in_transit"
+        | "out_for_delivery"
+        | "delivered"
+        | "cancelled"
+        | "returned"
+        | "refunded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -518,6 +567,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "customer", "seller"],
+      order_status_phase: [
+        "order_placed",
+        "payment_pending",
+        "payment_confirmed",
+        "order_confirmed",
+        "processing",
+        "packed",
+        "shipped",
+        "in_transit",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+        "returned",
+        "refunded",
+      ],
     },
   },
 } as const
