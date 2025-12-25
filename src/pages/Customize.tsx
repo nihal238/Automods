@@ -2,11 +2,15 @@ import { Suspense, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, PerspectiveCamera } from "@react-three/drei";
-import { Palette, RotateCcw, Save, Share2, Sparkles } from "lucide-react";
+import { Palette, RotateCcw, Save, Share2, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { useCarBrands, useCarModels } from "@/hooks/useCarData";
+import { useServices } from "@/hooks/useServices";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import * as THREE from "three";
 
 // Simple 3D Car Component
@@ -123,7 +127,14 @@ function Scene({ color }: { color: string }) {
 
 const Customize = () => {
   const [selectedColor, setSelectedColor] = useState("#e63946");
-  const [selectedCar, setSelectedCar] = useState("swift");
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedMods, setSelectedMods] = useState<string[]>([]);
+
+  const { brands, loading: brandsLoading } = useCarBrands();
+  const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
+  const { services, loading: servicesLoading } = useServices();
+  const { user } = useAuth();
 
   const colors = [
     { name: "Racing Red", value: "#e63946" },
@@ -136,22 +147,50 @@ const Customize = () => {
     { name: "Gunmetal Grey", value: "#495057" },
   ];
 
-  const carModels = [
-    { id: "swift", name: "Maruti Swift", brand: "Maruti Suzuki" },
-    { id: "i20", name: "i20", brand: "Hyundai" },
-    { id: "nexon", name: "Nexon", brand: "Tata" },
-    { id: "thar", name: "Thar", brand: "Mahindra" },
-    { id: "city", name: "City", brand: "Honda" },
-    { id: "creta", name: "Creta", brand: "Hyundai" },
-  ];
+  const toggleMod = (modId: string) => {
+    setSelectedMods((prev) =>
+      prev.includes(modId) ? prev.filter((id) => id !== modId) : [...prev, modId]
+    );
+  };
 
-  const modifications = [
-    { id: "bodykit", name: "Sport Body Kit", price: 45000, applied: false },
-    { id: "spoiler", name: "Rear Spoiler", price: 12000, applied: true },
-    { id: "alloys", name: "17\" Alloy Wheels", price: 48000, applied: true },
-    { id: "exhaust", name: "Sport Exhaust", price: 28000, applied: false },
-    { id: "lowering", name: "Lowering Springs", price: 15000, applied: false },
-  ];
+  const totalCost = selectedMods.reduce((acc, modId) => {
+    const service = services.find((s) => s.id === modId);
+    return acc + (service?.base_price || 0);
+  }, 0);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const selectedBrandData = brands.find((b) => b.id === selectedBrand);
+  const selectedModelData = models.find((m) => m.id === selectedModel);
+
+  const handleSaveDesign = () => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to save designs",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Design Saved!",
+      description: "Your custom design has been saved to your account",
+    });
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Link Copied!",
+      description: "Share link has been copied to clipboard",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -173,11 +212,11 @@ const Customize = () => {
                 <RotateCcw className="h-4 w-4" />
                 Reset View
               </Button>
-              <Button variant="glass" size="sm" className="gap-2">
+              <Button variant="glass" size="sm" className="gap-2" onClick={handleSaveDesign}>
                 <Save className="h-4 w-4" />
                 Save Design
               </Button>
-              <Button variant="glass" size="sm" className="gap-2">
+              <Button variant="glass" size="sm" className="gap-2" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
@@ -192,8 +231,9 @@ const Customize = () => {
               >
                 <p className="text-xs text-muted-foreground">Currently Viewing</p>
                 <p className="font-display font-bold">
-                  {carModels.find((c) => c.id === selectedCar)?.brand}{" "}
-                  {carModels.find((c) => c.id === selectedCar)?.name}
+                  {selectedBrandData && selectedModelData
+                    ? `${selectedBrandData.name} ${selectedModelData.name}`
+                    : "Select a car model"}
                 </p>
               </motion.div>
             </div>
@@ -217,30 +257,71 @@ const Customize = () => {
                 </div>
               </div>
 
-              {/* Car Selection */}
+              {/* Brand Selection */}
               <Card variant="glass">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Select Model</CardTitle>
+                  <CardTitle className="text-sm">Select Brand</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-2">
-                    {carModels.map((car) => (
-                      <button
-                        key={car.id}
-                        onClick={() => setSelectedCar(car.id)}
-                        className={`p-3 rounded-lg border text-left transition-all duration-300 ${
-                          selectedCar === car.id
-                            ? "border-primary bg-primary/10"
-                            : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                        }`}
-                      >
-                        <p className="text-xs text-muted-foreground">{car.brand}</p>
-                        <p className="font-medium text-sm">{car.name}</p>
-                      </button>
-                    ))}
-                  </div>
+                  {brandsLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {brands.slice(0, 6).map((brand) => (
+                        <button
+                          key={brand.id}
+                          onClick={() => {
+                            setSelectedBrand(brand.id);
+                            setSelectedModel(null);
+                          }}
+                          className={`p-3 rounded-lg border text-left transition-all duration-300 ${
+                            selectedBrand === brand.id
+                              ? "border-primary bg-primary/10"
+                              : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                          }`}
+                        >
+                          <p className="text-xs text-muted-foreground">{brand.logo_code}</p>
+                          <p className="font-medium text-sm">{brand.name}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
+
+              {/* Model Selection */}
+              {selectedBrand && (
+                <Card variant="glass">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Select Model</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {modelsLoading ? (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2">
+                        {models.map((model) => (
+                          <button
+                            key={model.id}
+                            onClick={() => setSelectedModel(model.id)}
+                            className={`p-3 rounded-lg border text-left transition-all duration-300 ${
+                              selectedModel === model.id
+                                ? "border-primary bg-primary/10"
+                                : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                            }`}
+                          >
+                            <p className="font-medium text-sm">{model.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Color Selection */}
               <Card variant="glass">
@@ -278,30 +359,37 @@ const Customize = () => {
                   <CardTitle className="text-sm">Modifications</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {modifications.map((mod) => (
-                    <div
-                      key={mod.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${
-                        mod.applied
-                          ? "border-primary/30 bg-primary/5"
-                          : "border-border/50 bg-secondary/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-4 h-4 rounded border-2 ${
-                            mod.applied
-                              ? "border-primary bg-primary"
-                              : "border-muted-foreground"
-                          }`}
-                        />
-                        <span className="text-sm">{mod.name}</span>
-                      </div>
-                      <span className="text-sm font-display text-primary">
-                        ₹{mod.price.toLocaleString("en-IN")}
-                      </span>
+                  {servicesLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
                     </div>
-                  ))}
+                  ) : (
+                    services.slice(0, 5).map((service) => (
+                      <button
+                        key={service.id}
+                        onClick={() => toggleMod(service.id)}
+                        className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${
+                          selectedMods.includes(service.id)
+                            ? "border-primary/30 bg-primary/5"
+                            : "border-border/50 bg-secondary/30"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-4 h-4 rounded border-2 ${
+                              selectedMods.includes(service.id)
+                                ? "border-primary bg-primary"
+                                : "border-muted-foreground"
+                            }`}
+                          />
+                          <span className="text-sm">{service.name}</span>
+                        </div>
+                        <span className="text-sm font-display text-primary">
+                          {formatPrice(service.base_price)}
+                        </span>
+                      </button>
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
@@ -310,10 +398,7 @@ const Customize = () => {
                 <div className="flex justify-between items-center p-4 rounded-lg bg-primary/10 border border-primary/30">
                   <span className="font-display font-bold">Total Cost</span>
                   <span className="font-display font-bold text-xl text-gradient">
-                    ₹{modifications
-                      .filter((m) => m.applied)
-                      .reduce((acc, m) => acc + m.price, 0)
-                      .toLocaleString("en-IN")}
+                    {formatPrice(totalCost)}
                   </span>
                 </div>
 

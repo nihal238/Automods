@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown } from "lucide-react";
+import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const { addToCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const categories = [
     { id: "all", name: "All Products" },
@@ -23,9 +29,10 @@ const Marketplace = () => {
     { id: "performance", name: "Performance" },
   ];
 
+  // Static products for demo (will be replaced with DB products when sellers add them)
   const products = [
     {
-      id: 1,
+      id: "1",
       name: "Aggressive Front Bumper Kit",
       brand: "AutoStyle Pro",
       price: 32000,
@@ -38,7 +45,7 @@ const Marketplace = () => {
       seller: "SpeedWorks Mumbai",
     },
     {
-      id: 2,
+      id: "2",
       name: "17\" Alloy Wheels Set",
       brand: "Enkei",
       price: 48000,
@@ -51,7 +58,7 @@ const Marketplace = () => {
       seller: "WheelHub Delhi",
     },
     {
-      id: 3,
+      id: "3",
       name: "Sport Exhaust System",
       brand: "Borla",
       price: 28000,
@@ -64,7 +71,7 @@ const Marketplace = () => {
       seller: "Performance Plus",
     },
     {
-      id: 4,
+      id: "4",
       name: "LED DRL Headlight Set",
       brand: "Philips Racing",
       price: 18500,
@@ -77,7 +84,7 @@ const Marketplace = () => {
       seller: "LightPro Chennai",
     },
     {
-      id: 5,
+      id: "5",
       name: "Premium Leather Seat Covers",
       brand: "Elegance Auto",
       price: 15000,
@@ -90,7 +97,7 @@ const Marketplace = () => {
       seller: "Interior Masters",
     },
     {
-      id: 6,
+      id: "6",
       name: "Cold Air Intake System",
       brand: "K&N Performance",
       price: 12500,
@@ -103,7 +110,7 @@ const Marketplace = () => {
       seller: "TurboZone Pune",
     },
     {
-      id: 7,
+      id: "7",
       name: "Wide Body Fender Kit",
       brand: "Liberty Walk Style",
       price: 85000,
@@ -116,7 +123,7 @@ const Marketplace = () => {
       seller: "Elite Mods Bangalore",
     },
     {
-      id: 8,
+      id: "8",
       name: "Sport Suspension Coilovers",
       brand: "Tein",
       price: 45000,
@@ -131,7 +138,8 @@ const Marketplace = () => {
   ];
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -142,6 +150,28 @@ const Marketplace = () => {
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleAddToCart = async (productId: string) => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to add items to cart",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setAddingToCart(productId);
+    
+    // For demo, we'll show a toast since products aren't in DB yet
+    toast({
+      title: "Coming Soon",
+      description: "Cart functionality will work when sellers add products to the marketplace.",
+    });
+    
+    setAddingToCart(null);
   };
 
   return (
@@ -240,9 +270,21 @@ const Marketplace = () => {
 
                     {/* Quick Add */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <Button variant="hero" size="sm" className="w-full">
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Add to Cart
+                      <Button 
+                        variant="hero" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleAddToCart(product.id)}
+                        disabled={addingToCart === product.id}
+                      >
+                        {addingToCart === product.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Add to Cart
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -293,12 +335,21 @@ const Marketplace = () => {
             ))}
           </div>
 
+          {/* Empty State */}
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No products found matching your criteria.</p>
+            </div>
+          )}
+
           {/* Load More */}
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Products
-            </Button>
-          </div>
+          {filteredProducts.length > 0 && (
+            <div className="text-center mt-12">
+              <Button variant="outline" size="lg">
+                Load More Products
+              </Button>
+            </div>
+          )}
         </div>
       </main>
 
