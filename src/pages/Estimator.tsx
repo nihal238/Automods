@@ -1,74 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Calculator, Car, Wrench, IndianRupee } from "lucide-react";
+import { ChevronRight, Calculator, Car, Wrench, IndianRupee, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { useCarBrands, useCarModels } from "@/hooks/useCarData";
+import { useServices } from "@/hooks/useServices";
+import { toast } from "@/hooks/use-toast";
 
 const Estimator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
-  const brands = [
-    { id: "maruti", name: "Maruti Suzuki", logo: "MS" },
-    { id: "hyundai", name: "Hyundai", logo: "HY" },
-    { id: "tata", name: "Tata Motors", logo: "TM" },
-    { id: "mahindra", name: "Mahindra", logo: "MH" },
-    { id: "honda", name: "Honda", logo: "HN" },
-    { id: "toyota", name: "Toyota", logo: "TY" },
-  ];
-
-  const models: Record<string, { id: string; name: string }[]> = {
-    maruti: [
-      { id: "swift", name: "Swift" },
-      { id: "baleno", name: "Baleno" },
-      { id: "brezza", name: "Brezza" },
-      { id: "ertiga", name: "Ertiga" },
-    ],
-    hyundai: [
-      { id: "i20", name: "i20" },
-      { id: "creta", name: "Creta" },
-      { id: "venue", name: "Venue" },
-      { id: "verna", name: "Verna" },
-    ],
-    tata: [
-      { id: "nexon", name: "Nexon" },
-      { id: "harrier", name: "Harrier" },
-      { id: "punch", name: "Punch" },
-      { id: "safari", name: "Safari" },
-    ],
-    mahindra: [
-      { id: "thar", name: "Thar" },
-      { id: "xuv700", name: "XUV700" },
-      { id: "scorpio", name: "Scorpio-N" },
-      { id: "xuv300", name: "XUV300" },
-    ],
-    honda: [
-      { id: "city", name: "City" },
-      { id: "amaze", name: "Amaze" },
-      { id: "elevate", name: "Elevate" },
-    ],
-    toyota: [
-      { id: "fortuner", name: "Fortuner" },
-      { id: "innova", name: "Innova Crysta" },
-      { id: "glanza", name: "Glanza" },
-    ],
-  };
-
-  const services = [
-    { id: "bodykit", name: "Body Kit Installation", price: 45000, category: "Exterior" },
-    { id: "wrap", name: "Full Car Wrap", price: 35000, category: "Exterior" },
-    { id: "alloys", name: "Alloy Wheels Upgrade", price: 28000, category: "Wheels" },
-    { id: "exhaust", name: "Performance Exhaust", price: 18000, category: "Performance" },
-    { id: "suspension", name: "Lowering Kit", price: 22000, category: "Performance" },
-    { id: "interior", name: "Premium Interior Upholstery", price: 32000, category: "Interior" },
-    { id: "lighting", name: "LED Lighting Package", price: 15000, category: "Exterior" },
-    { id: "audio", name: "Audio System Upgrade", price: 25000, category: "Interior" },
-    { id: "tint", name: "Window Tinting", price: 8000, category: "Exterior" },
-    { id: "ceramic", name: "Ceramic Coating", price: 30000, category: "Protection" },
-  ];
+  const { brands, loading: brandsLoading } = useCarBrands();
+  const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
+  const { services, loading: servicesLoading } = useServices();
 
   const toggleService = (serviceId: string) => {
     setSelectedServices((prev) =>
@@ -80,7 +28,7 @@ const Estimator = () => {
 
   const totalCost = selectedServices.reduce((acc, serviceId) => {
     const service = services.find((s) => s.id === serviceId);
-    return acc + (service?.price || 0);
+    return acc + (service?.base_price || 0);
   }, 0);
 
   const formatPrice = (price: number) => {
@@ -90,6 +38,25 @@ const Estimator = () => {
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  const handleGetQuote = () => {
+    if (!selectedModel || selectedServices.length === 0) {
+      toast({
+        title: "Incomplete Selection",
+        description: "Please select a car and at least one service",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Quote Requested!",
+      description: `We'll contact you soon with a detailed quote for ${formatPrice(totalCost)}`,
+    });
+  };
+
+  const selectedBrandData = brands.find((b) => b.id === selectedBrand);
+  const selectedModelData = models.find((m) => m.id === selectedModel);
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,27 +105,33 @@ const Estimator = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {brands.map((brand) => (
-                        <button
-                          key={brand.id}
-                          onClick={() => {
-                            setSelectedBrand(brand.id);
-                            setSelectedModel(null);
-                          }}
-                          className={`p-4 rounded-lg border transition-all duration-300 ${
-                            selectedBrand === brand.id
-                              ? "border-primary bg-primary/10 shadow-neon"
-                              : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                          }`}
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center mx-auto mb-2 font-display font-bold text-lg text-primary">
-                            {brand.logo}
-                          </div>
-                          <p className="text-sm font-medium text-center">{brand.name}</p>
-                        </button>
-                      ))}
-                    </div>
+                    {brandsLoading ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {brands.map((brand) => (
+                          <button
+                            key={brand.id}
+                            onClick={() => {
+                              setSelectedBrand(brand.id);
+                              setSelectedModel(null);
+                            }}
+                            className={`p-4 rounded-lg border transition-all duration-300 ${
+                              selectedBrand === brand.id
+                                ? "border-primary bg-primary/10 shadow-neon"
+                                : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                            }`}
+                          >
+                            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center mx-auto mb-2 font-display font-bold text-lg text-primary">
+                              {brand.logo_code}
+                            </div>
+                            <p className="text-sm font-medium text-center">{brand.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -177,27 +150,49 @@ const Estimator = () => {
                         </div>
                         <div>
                           <CardTitle className="text-lg">Select Model</CardTitle>
-                          <CardDescription>Choose your car model</CardDescription>
+                          <CardDescription>Choose your {selectedBrandData?.name} model</CardDescription>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {models[selectedBrand]?.map((model) => (
-                          <button
-                            key={model.id}
-                            onClick={() => setSelectedModel(model.id)}
-                            className={`p-4 rounded-lg border transition-all duration-300 ${
-                              selectedModel === model.id
-                                ? "border-primary bg-primary/10 shadow-neon"
-                                : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                            }`}
-                          >
-                            <Car className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm font-medium text-center">{model.name}</p>
-                          </button>
-                        ))}
-                      </div>
+                      {modelsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      ) : models.length === 0 ? (
+                        <p className="text-muted-foreground text-center py-4">No models found</p>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {models.map((model) => (
+                            <button
+                              key={model.id}
+                              onClick={() => setSelectedModel(model.id)}
+                              className={`p-4 rounded-lg border transition-all duration-300 overflow-hidden ${
+                                selectedModel === model.id
+                                  ? "border-primary bg-primary/10 shadow-neon"
+                                  : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                              }`}
+                            >
+                              {model.image_url ? (
+                                <div className="w-full h-16 rounded-lg overflow-hidden mb-2">
+                                  <img
+                                    src={model.image_url}
+                                    alt={model.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      e.currentTarget.parentElement!.innerHTML = '<div class="h-full flex items-center justify-center"><svg class="h-8 w-8 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0m10 0m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0m-9-2h10V8l3 3H3v4l2 2z"/></svg></div>';
+                                    }}
+                                  />
+                                </div>
+                              ) : (
+                                <Car className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                              )}
+                              <p className="text-sm font-medium text-center">{model.name}</p>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -222,40 +217,46 @@ const Estimator = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-3">
-                        {services.map((service) => (
-                          <button
-                            key={service.id}
-                            onClick={() => toggleService(service.id)}
-                            className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-300 ${
-                              selectedServices.includes(service.id)
-                                ? "border-primary bg-primary/10"
-                                : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                            }`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div
-                                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                                  selectedServices.includes(service.id)
-                                    ? "border-primary bg-primary"
-                                    : "border-muted-foreground"
-                                }`}
-                              >
-                                {selectedServices.includes(service.id) && (
-                                  <ChevronRight className="h-3 w-3 text-primary-foreground" />
-                                )}
+                      {servicesLoading ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {services.map((service) => (
+                            <button
+                              key={service.id}
+                              onClick={() => toggleService(service.id)}
+                              className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-300 ${
+                                selectedServices.includes(service.id)
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                              }`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div
+                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                    selectedServices.includes(service.id)
+                                      ? "border-primary bg-primary"
+                                      : "border-muted-foreground"
+                                  }`}
+                                >
+                                  {selectedServices.includes(service.id) && (
+                                    <ChevronRight className="h-3 w-3 text-primary-foreground" />
+                                  )}
+                                </div>
+                                <div className="text-left">
+                                  <p className="font-medium">{service.name}</p>
+                                  <p className="text-xs text-muted-foreground">{service.category}</p>
+                                </div>
                               </div>
-                              <div className="text-left">
-                                <p className="font-medium">{service.name}</p>
-                                <p className="text-xs text-muted-foreground">{service.category}</p>
-                              </div>
-                            </div>
-                            <span className="font-display font-bold text-primary">
-                              {formatPrice(service.price)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
+                              <span className="font-display font-bold text-primary">
+                                {formatPrice(service.base_price)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -284,10 +285,8 @@ const Estimator = () => {
                           Selected Vehicle
                         </p>
                         <p className="font-display font-bold">
-                          {selectedBrand && selectedModel
-                            ? `${brands.find((b) => b.id === selectedBrand)?.name} ${
-                                models[selectedBrand]?.find((m) => m.id === selectedModel)?.name
-                              }`
+                          {selectedBrandData && selectedModelData
+                            ? `${selectedBrandData.name} ${selectedModelData.name}`
                             : "No vehicle selected"}
                         </p>
                       </div>
@@ -307,7 +306,7 @@ const Estimator = () => {
                                   className="flex justify-between items-center text-sm"
                                 >
                                   <span className="text-muted-foreground">{service?.name}</span>
-                                  <span>{formatPrice(service?.price || 0)}</span>
+                                  <span>{formatPrice(service?.base_price || 0)}</span>
                                 </div>
                               );
                             })}
@@ -333,6 +332,7 @@ const Estimator = () => {
                         variant="hero"
                         className="w-full"
                         disabled={selectedServices.length === 0}
+                        onClick={handleGetQuote}
                       >
                         <Wrench className="h-4 w-4 mr-2" />
                         Get Detailed Quote
