@@ -27,9 +27,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Search, ShoppingBag, Eye, DollarSign, Calendar, ImageIcon } from "lucide-react";
+import { Search, ShoppingBag, Eye, IndianRupee, Calendar, ImageIcon, XCircle } from "lucide-react";
 import { format } from "date-fns";
+import { formatPrice } from "@/lib/currency";
 
 interface Order {
   id: string;
@@ -57,7 +69,7 @@ interface OrderItem {
   } | null;
 }
 
-const orderStatuses = ["pending", "processing", "completed"];
+const orderStatuses = ["pending", "processing", "completed", "cancelled"];
 
 const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,6 +142,8 @@ const AdminOrders = () => {
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
       case "completed":
         return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "cancelled":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -207,8 +221,8 @@ const AdminOrders = () => {
                   </TableCell>
                   <TableCell>
                     <span className="flex items-center text-primary font-medium">
-                      <DollarSign className="h-3 w-3" />
-                      {(order.total_amount / 100).toFixed(2)}
+                      <IndianRupee className="h-3 w-3" />
+                      {formatPrice(order.total_amount).replace("₹", "")}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -233,18 +247,44 @@ const AdminOrders = () => {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedOrder(order)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-end gap-2">
+                      {order.status !== "cancelled" && order.status !== "completed" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to cancel this order? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Keep Order</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: "cancelled" })}
+                              >
+                                Cancel Order
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Order Details #{order.id.slice(0, 8)}</DialogTitle>
                         </DialogHeader>
@@ -322,10 +362,10 @@ const AdminOrders = () => {
                                     )}
                                     <div className="flex items-center justify-between mt-2">
                                       <span className="text-sm text-muted-foreground">
-                                        Qty: {item.quantity} × ${(item.price / 100).toFixed(2)}
+                                        Qty: {item.quantity} × {formatPrice(item.price)}
                                       </span>
                                       <span className="text-primary font-semibold">
-                                        ${((item.price * item.quantity) / 100).toFixed(2)}
+                                        {formatPrice(item.price * item.quantity)}
                                       </span>
                                     </div>
                                   </div>
@@ -338,13 +378,14 @@ const AdminOrders = () => {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-medium">Total Amount</span>
                               <span className="text-2xl font-bold text-primary">
-                                ${(order.total_amount / 100).toFixed(2)}
+                                {formatPrice(order.total_amount)}
                               </span>
                             </div>
                           </div>
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

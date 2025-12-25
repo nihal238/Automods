@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,10 +21,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Eye, DollarSign, Calendar, Package, Download, ImageIcon } from "lucide-react";
+import { ShoppingBag, Eye, IndianRupee, Calendar, Package, Download, ImageIcon, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { toast } from "sonner";
+import { jsPDF } from "jspdf";
+import { formatPrice } from "@/lib/currency";
 
 interface Order {
   id: string;
@@ -54,6 +68,7 @@ interface OrderItem {
 const MyOrders = () => {
   const { user, loading } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["my-orders", user?.id],
@@ -95,6 +110,25 @@ const MyOrders = () => {
     enabled: !!selectedOrder,
   });
 
+  const cancelOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", orderId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-orders"] });
+      toast.success("Order cancelled successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to cancel order");
+      console.error(error);
+    },
+  });
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -103,54 +137,79 @@ const MyOrders = () => {
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
       case "completed":
         return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "cancelled":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
       default:
         return "bg-muted text-muted-foreground";
     }
   };
 
   const downloadInvoice = (order: Order, items: OrderItem[]) => {
-    const invoiceContent = `
-=====================================
-            INVOICE
-=====================================
-Order ID: #${order.id.slice(0, 8)}
-Date: ${format(new Date(order.created_at), "MMMM d, yyyy")}
-Status: ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-
--------------------------------------
-SHIPPING INFORMATION
--------------------------------------
-Address: ${order.shipping_address || "N/A"}
-Phone: ${order.phone || "N/A"}
-
--------------------------------------
-ORDER ITEMS
--------------------------------------
-${items.map(item => `
-${item.product_name}
-  Brand: ${item.products?.brand || "N/A"}
-  Category: ${item.products?.category || "N/A"}
-  Quantity: ${item.quantity}
-  Unit Price: $${(item.price / 100).toFixed(2)}
-  Subtotal: $${((item.price * item.quantity) / 100).toFixed(2)}
-`).join("\n")}
-
--------------------------------------
-TOTAL: $${(order.total_amount / 100).toFixed(2)}
--------------------------------------
-
-Thank you for your order!
-    `.trim();
-
-    const blob = new Blob([invoiceContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invoice-${order.id.slice(0, 8)}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("INVOICE", 105, 20, { align: "center" });
+    
+    // Order details
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Order ID: #${order.id.slice(0, 8)}`, 20, 35);
+    doc.text(`Date: ${format(new Date(order.created_at), "MMMM d, yyyy")}`, 20, 42);
+    doc.text(`Status: ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`, 20, 49);
+    
+    // Shipping info
+    doc.setFont("helvetica", "bold");
+    doc.text("Shipping Information", 20, 62);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Address: ${order.shipping_address || "N/A"}`, 20, 70);
+    doc.text(`Phone: ${order.phone || "N/A"}`, 20, 77);
+    
+    // Items header
+    doc.setFont("helvetica", "bold");
+    doc.text("Order Items", 20, 92);
+    
+    // Table header
+    let yPos = 100;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, yPos - 5, 170, 8, "F");
+    doc.text("Product", 22, yPos);
+    doc.text("Qty", 120, yPos);
+    doc.text("Price", 140, yPos);
+    doc.text("Total", 165, yPos);
+    
+    // Items
+    doc.setFont("helvetica", "normal");
+    yPos += 10;
+    items.forEach((item) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(item.product_name.substring(0, 40), 22, yPos);
+      doc.text(item.quantity.toString(), 120, yPos);
+      doc.text(formatPrice(item.price), 140, yPos);
+      doc.text(formatPrice(item.price * item.quantity), 165, yPos);
+      yPos += 8;
+    });
+    
+    // Total
+    yPos += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, yPos, 190, yPos);
+    yPos += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Total Amount:", 130, yPos);
+    doc.text(formatPrice(order.total_amount), 165, yPos);
+    
+    // Footer
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Thank you for your order!", 105, yPos + 20, { align: "center" });
+    
+    doc.save(`invoice-${order.id.slice(0, 8)}.pdf`);
   };
 
   if (loading) {
@@ -217,8 +276,8 @@ Thank you for your order!
                         </TableCell>
                         <TableCell>
                           <span className="flex items-center text-primary font-medium">
-                            <DollarSign className="h-3 w-3" />
-                            {(order.total_amount / 100).toFixed(2)}
+                            <IndianRupee className="h-3 w-3" />
+                            {formatPrice(order.total_amount).replace("₹", "")}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -326,26 +385,54 @@ Thank you for your order!
                                             </p>
                                           )}
                                           <div className="flex items-center justify-between mt-2">
-                                            <span className="text-sm text-muted-foreground">
-                                              Qty: {item.quantity} × ${(item.price / 100).toFixed(2)}
-                                            </span>
-                                            <span className="text-primary font-semibold">
-                                              ${((item.price * item.quantity) / 100).toFixed(2)}
-                                            </span>
-                                          </div>
+                                          <span className="text-sm text-muted-foreground">
+                                            Qty: {item.quantity} × {formatPrice(item.price)}
+                                          </span>
+                                          <span className="text-primary font-semibold">
+                                            {formatPrice(item.price * item.quantity)}
+                                          </span>
                                         </div>
                                       </div>
+                                    </div>
                                     ))}
                                   </div>
                                 </div>
 
-                                <div className="border-t border-border pt-4">
+                                <div className="border-t border-border pt-4 space-y-4">
                                   <div className="flex justify-between items-center">
                                     <span className="text-lg font-medium">Total Amount</span>
                                     <span className="text-2xl font-bold text-primary">
-                                      ${(order.total_amount / 100).toFixed(2)}
+                                      {formatPrice(order.total_amount)}
                                     </span>
                                   </div>
+                                  
+                                  {order.status === "pending" && (
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" className="w-full">
+                                          <XCircle className="h-4 w-4 mr-2" />
+                                          Cancel Order
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to cancel this order? This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Keep Order</AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() => cancelOrderMutation.mutate(order.id)}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          >
+                                            Cancel Order
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  )}
                                 </div>
                               </div>
                             </DialogContent>

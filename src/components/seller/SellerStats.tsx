@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
+import { Package, IndianRupee, ShoppingCart, TrendingUp } from "lucide-react";
+import { formatPrice } from "@/lib/currency";
 
 const SellerStats = () => {
   const { user } = useAuth();
@@ -66,13 +67,13 @@ const SellerStats = () => {
     },
     {
       title: "Inventory Value",
-      value: `$${((stats?.inventoryValue || 0) / 100).toFixed(2)}`,
-      icon: DollarSign,
+      value: formatPrice(stats?.inventoryValue || 0),
+      icon: IndianRupee,
       color: "text-yellow-500",
     },
     {
       title: "Total Sales",
-      value: `$${((stats?.totalSales || 0) / 100).toFixed(2)}`,
+      value: formatPrice(stats?.totalSales || 0),
       icon: TrendingUp,
       color: "text-primary",
     },

@@ -309,13 +309,13 @@ const ProductForm = ({ productId, onComplete }: ProductFormProps) => {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price ($)</FormLabel>
+                    <FormLabel>Price (₹)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        step="0.01"
+                        step="1"
                         min="0"
-                        placeholder="0.00"
+                        placeholder="0"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                       />
@@ -330,7 +330,7 @@ const ProductForm = ({ productId, onComplete }: ProductFormProps) => {
                 name="original_price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Original Price ($)</FormLabel>
+                    <FormLabel>Original Price (₹)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"

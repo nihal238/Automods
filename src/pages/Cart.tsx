@@ -12,21 +12,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
+import { formatPrice } from "@/lib/currency";
+
 const Cart = () => {
   const { items, loading, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  const [address, setAddress] = useState("");
+  const [pincode, setPincode] = useState("");
 
   const handleCheckout = async () => {
     if (!user) {
@@ -39,25 +35,43 @@ const Cart = () => {
       return;
     }
 
-    if (!shippingAddress.trim()) {
+    if (!fullName.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your full name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!phone.trim() || phone.length < 10) {
+      toast({
+        title: "Valid phone number required",
+        description: "Please enter a valid 10-digit mobile number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!address.trim()) {
       toast({
         title: "Address required",
-        description: "Please enter your shipping address",
+        description: "Please enter your complete shipping address",
         variant: "destructive",
       });
       return;
     }
 
-    if (!phone.trim()) {
+    if (!pincode.trim() || pincode.length !== 6) {
       toast({
-        title: "Phone required",
-        description: "Please enter your phone number",
+        title: "Valid pincode required",
+        description: "Please enter a valid 6-digit pincode",
         variant: "destructive",
       });
       return;
     }
 
-    setCheckoutLoading(true);
+    const shippingAddress = `${fullName}\n${address}\nPincode: ${pincode}`;
 
     try {
       // Create order
@@ -260,24 +274,44 @@ const Cart = () => {
                     <CardTitle>Order Summary</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Shipping Address */}
+                    {/* Full Name */}
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Shipping Address</label>
+                      <label className="text-sm font-medium mb-2 block">Full Name *</label>
                       <Input
-                        placeholder="Enter your full address"
-                        value={shippingAddress}
-                        onChange={(e) => setShippingAddress(e.target.value)}
+                        placeholder="Enter your full name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
                       />
                     </div>
 
                     {/* Phone */}
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Phone Number</label>
+                      <label className="text-sm font-medium mb-2 block">Mobile Number *</label>
                       <Input
                         type="tel"
-                        placeholder="+91 98765 43210"
+                        placeholder="10-digit mobile number"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      />
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Shipping Address *</label>
+                      <Input
+                        placeholder="Enter your full address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Pincode */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Pincode *</label>
+                      <Input
+                        placeholder="6-digit pincode"
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       />
                     </div>
 
