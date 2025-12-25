@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2 } from "lucide-react";
+import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useProducts } from "@/hooks/useProducts";
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,138 +19,29 @@ const Marketplace = () => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Fetch real products from database
+  const { products, loading } = useProducts(selectedCategory, searchQuery);
 
   const categories = [
     { id: "all", name: "All Products" },
-    { id: "bodykits", name: "Body Kits" },
-    { id: "wheels", name: "Wheels & Tires" },
-    { id: "exhaust", name: "Exhaust Systems" },
-    { id: "interior", name: "Interior" },
-    { id: "lighting", name: "Lighting" },
-    { id: "performance", name: "Performance" },
+    { id: "Performance Parts", name: "Performance" },
+    { id: "Exterior", name: "Exterior" },
+    { id: "Interior", name: "Interior" },
+    { id: "Wheels & Tires", name: "Wheels & Tires" },
+    { id: "Lighting", name: "Lighting" },
+    { id: "Electronics", name: "Electronics" },
+    { id: "Exhaust", name: "Exhaust" },
+    { id: "Suspension", name: "Suspension" },
+    { id: "Accessories", name: "Accessories" },
   ];
-
-  // Static products for demo (will be replaced with DB products when sellers add them)
-  const products = [
-    {
-      id: "1",
-      name: "Aggressive Front Bumper Kit",
-      brand: "AutoStyle Pro",
-      price: 32000,
-      originalPrice: 38000,
-      rating: 4.8,
-      reviews: 124,
-      image: "FK",
-      category: "bodykits",
-      compatibility: ["Swift", "Baleno", "i20"],
-      seller: "SpeedWorks Mumbai",
-    },
-    {
-      id: "2",
-      name: "17\" Alloy Wheels Set",
-      brand: "Enkei",
-      price: 48000,
-      originalPrice: 52000,
-      rating: 4.9,
-      reviews: 89,
-      image: "AW",
-      category: "wheels",
-      compatibility: ["Multiple Models"],
-      seller: "WheelHub Delhi",
-    },
-    {
-      id: "3",
-      name: "Sport Exhaust System",
-      brand: "Borla",
-      price: 28000,
-      originalPrice: null,
-      rating: 4.7,
-      reviews: 56,
-      image: "EX",
-      category: "exhaust",
-      compatibility: ["City", "Verna", "Civic"],
-      seller: "Performance Plus",
-    },
-    {
-      id: "4",
-      name: "LED DRL Headlight Set",
-      brand: "Philips Racing",
-      price: 18500,
-      originalPrice: 22000,
-      rating: 4.6,
-      reviews: 203,
-      image: "HL",
-      category: "lighting",
-      compatibility: ["Nexon", "Creta", "Brezza"],
-      seller: "LightPro Chennai",
-    },
-    {
-      id: "5",
-      name: "Premium Leather Seat Covers",
-      brand: "Elegance Auto",
-      price: 15000,
-      originalPrice: 18000,
-      rating: 4.5,
-      reviews: 167,
-      image: "SC",
-      category: "interior",
-      compatibility: ["Universal Fit"],
-      seller: "Interior Masters",
-    },
-    {
-      id: "6",
-      name: "Cold Air Intake System",
-      brand: "K&N Performance",
-      price: 12500,
-      originalPrice: null,
-      rating: 4.8,
-      reviews: 78,
-      image: "AI",
-      category: "performance",
-      compatibility: ["Swift", "Polo", "i20"],
-      seller: "TurboZone Pune",
-    },
-    {
-      id: "7",
-      name: "Wide Body Fender Kit",
-      brand: "Liberty Walk Style",
-      price: 85000,
-      originalPrice: 95000,
-      rating: 4.9,
-      reviews: 34,
-      image: "WB",
-      category: "bodykits",
-      compatibility: ["Thar", "Fortuner"],
-      seller: "Elite Mods Bangalore",
-    },
-    {
-      id: "8",
-      name: "Sport Suspension Coilovers",
-      brand: "Tein",
-      price: 45000,
-      originalPrice: null,
-      rating: 4.7,
-      reviews: 92,
-      image: "SP",
-      category: "performance",
-      compatibility: ["Swift", "City", "Verna"],
-      seller: "Suspension Pro",
-    },
-  ];
-
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
       maximumFractionDigits: 0,
-    }).format(price);
+    }).format(price / 100);
   };
 
   const handleAddToCart = async (productId: string) => {
@@ -165,13 +57,21 @@ const Marketplace = () => {
 
     setAddingToCart(productId);
     
-    // For demo, we'll show a toast since products aren't in DB yet
-    toast({
-      title: "Coming Soon",
-      description: "Cart functionality will work when sellers add products to the marketplace.",
-    });
-    
-    setAddingToCart(null);
+    try {
+      await addToCart(productId, 1);
+      toast({
+        title: "Added to cart!",
+        description: "Product has been added to your cart.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add product to cart.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingToCart(null);
+    }
   };
 
   return (
@@ -205,7 +105,7 @@ const Marketplace = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search parts, brands, or sellers..."
+                placeholder="Search parts, brands..."
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -238,116 +138,130 @@ const Marketplace = () => {
             ))}
           </motion.div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Card variant="glass" className="group overflow-hidden hover:border-primary/30 transition-all duration-300">
-                  {/* Product Image */}
-                  <div className="aspect-square bg-gradient-to-br from-secondary to-muted relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-6xl font-display font-bold text-muted-foreground/30 group-hover:scale-110 transition-transform duration-300">
-                        {product.image}
-                      </span>
-                    </div>
-                    
-                    {/* Discount Badge */}
-                    {product.originalPrice && (
-                      <div className="absolute top-3 left-3 px-2 py-1 rounded bg-primary text-primary-foreground text-xs font-display font-bold">
-                        {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                      </div>
-                    )}
-
-                    {/* Wishlist Button */}
-                    <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground">
-                      <Heart className="h-4 w-4" />
-                    </button>
-
-                    {/* Quick Add */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <Button 
-                        variant="hero" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => handleAddToCart(product.id)}
-                        disabled={addingToCart === product.id}
-                      >
-                        {addingToCart === product.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Add to Cart
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-4">
-                    {/* Brand */}
-                    <p className="text-xs text-primary font-display uppercase tracking-wider mb-1">
-                      {product.brand}
-                    </p>
-
-                    {/* Name */}
-                    <h3 className="font-medium text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h3>
-
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 mb-2">
-                      <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                      <span className="text-sm font-medium">{product.rating}</span>
-                      <span className="text-xs text-muted-foreground">({product.reviews})</span>
-                    </div>
-
-                    {/* Compatibility */}
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Fits: {product.compatibility.slice(0, 2).join(", ")}
-                      {product.compatibility.length > 2 && ` +${product.compatibility.length - 2}`}
-                    </p>
-
-                    {/* Price */}
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display font-bold text-lg text-primary">
-                        {formatPrice(product.price)}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          {formatPrice(product.originalPrice)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Seller */}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Sold by: {product.seller}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No products found matching your criteria.</p>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
 
-          {/* Load More */}
-          {filteredProducts.length > 0 && (
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg">
-                Load More Products
-              </Button>
+          {/* Empty State */}
+          {!loading && products.length === 0 && (
+            <div className="text-center py-12">
+              <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No products yet</h3>
+              <p className="text-muted-foreground">
+                Check back soon! Sellers are adding new products.
+              </p>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {!loading && products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                >
+                  <Card variant="glass" className="group overflow-hidden hover:border-primary/30 transition-all duration-300">
+                    {/* Product Image */}
+                    <div className="aspect-square bg-gradient-to-br from-secondary to-muted relative overflow-hidden">
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Package className="h-16 w-16 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      
+                      {/* Discount Badge */}
+                      {product.original_price && product.original_price > product.price && (
+                        <div className="absolute top-3 left-3 px-2 py-1 rounded bg-primary text-primary-foreground text-xs font-display font-bold">
+                          {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% OFF
+                        </div>
+                      )}
+
+                      {/* Wishlist Button */}
+                      <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground">
+                        <Heart className="h-4 w-4" />
+                      </button>
+
+                      {/* Quick Add */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <Button 
+                          variant="hero" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => handleAddToCart(product.id)}
+                          disabled={addingToCart === product.id || product.stock === 0}
+                        >
+                          {addingToCart === product.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : product.stock === 0 ? (
+                            "Out of Stock"
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <CardContent className="p-4">
+                      {/* Brand */}
+                      <p className="text-xs text-primary font-display uppercase tracking-wider mb-1">
+                        {product.brand}
+                      </p>
+
+                      {/* Name */}
+                      <h3 className="font-medium text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+
+                      {/* Rating */}
+                      <div className="flex items-center gap-1 mb-2">
+                        <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                        <span className="text-sm font-medium">{product.rating || 0}</span>
+                        <span className="text-xs text-muted-foreground">({product.review_count || 0})</span>
+                      </div>
+
+                      {/* Compatibility */}
+                      {product.compatibility && product.compatibility.length > 0 && (
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Fits: {product.compatibility.slice(0, 2).join(", ")}
+                          {product.compatibility.length > 2 && ` +${product.compatibility.length - 2}`}
+                        </p>
+                      )}
+
+                      {/* Price */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-display font-bold text-lg text-primary">
+                          {formatPrice(product.price)}
+                        </span>
+                        {product.original_price && product.original_price > product.price && (
+                          <span className="text-sm text-muted-foreground line-through">
+                            {formatPrice(product.original_price)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Stock indicator */}
+                      {product.stock < 10 && product.stock > 0 && (
+                        <p className="text-xs text-destructive mt-2">Only {product.stock} left!</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           )}
         </div>

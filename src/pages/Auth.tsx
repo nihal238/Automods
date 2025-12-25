@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Car } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Car, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
 const authSchema = z.object({
@@ -15,8 +16,10 @@ const authSchema = z.object({
   name: z.string().trim().min(1, "Name is required").optional(),
 });
 
+type AuthView = "login" | "signup" | "forgot-password";
+
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"customer" | "seller">("customer");
   const [loading, setLoading] = useState(false);
@@ -40,14 +43,35 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      if (view === "forgot-password") {
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+          redirectTo: `${window.location.origin}/auth?reset=true`,
+        });
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a password reset link.",
+          });
+          setView("login");
+        }
+        return;
+      }
+
       // Validate form data
-      const validationData = isLogin
+      const validationData = view === "login"
         ? { email: formData.email, password: formData.password }
         : { email: formData.email, password: formData.password, name: formData.name };
 
-      const validated = authSchema.parse(validationData);
+      authSchema.parse(validationData);
 
-      if (isLogin) {
+      if (view === "login") {
         const { error } = await signIn(formData.email, formData.password);
 
         if (error) {
@@ -116,6 +140,167 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderForm = () => {
+    if (view === "forgot-password") {
+      return (
+        <>
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl">Reset Password</CardTitle>
+            <CardDescription>
+              Enter your email to receive a reset link
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email Address"
+                  className="pl-10"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+                {loading ? "Sending..." : "Send Reset Link"}
+              </Button>
+            </form>
+
+            <button
+              type="button"
+              onClick={() => setView("login")}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mt-6 mx-auto"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to login
+            </button>
+          </CardContent>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-2xl">
+            {view === "login" ? "Welcome Back" : "Create Account"}
+          </CardTitle>
+          <CardDescription>
+            {view === "login"
+              ? "Sign in to continue your journey"
+              : "Join the ModGarage community"}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          {/* Role Selector (Sign Up Only) */}
+          {view === "signup" && (
+            <div className="flex gap-2 mb-6">
+              <Button
+                type="button"
+                variant={role === "customer" ? "default" : "secondary"}
+                className="flex-1"
+                onClick={() => setRole("customer")}
+              >
+                Customer
+              </Button>
+              <Button
+                type="button"
+                variant={role === "seller" ? "default" : "secondary"}
+                className="flex-1"
+                onClick={() => setRole("seller")}
+              >
+                Seller
+              </Button>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {view === "signup" && (
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  className="pl-10"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+            )}
+
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="email"
+                placeholder="Email Address"
+                className="pl-10"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="pl-10 pr-10"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+
+            {view === "login" && (
+              <button
+                type="button"
+                onClick={() => setView("forgot-password")}
+                className="text-sm text-primary hover:underline block w-full text-right"
+              >
+                Forgot password?
+              </button>
+            )}
+
+            <Button type="submit" variant="hero" className="w-full group" disabled={loading}>
+              {loading ? (
+                "Please wait..."
+              ) : (
+                <>
+                  {view === "login" ? "Sign In" : "Create Account"}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            {view === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => setView(view === "login" ? "signup" : "login")}
+              className="text-primary hover:underline font-medium"
+            >
+              {view === "login" ? "Sign up" : "Sign in"}
+            </button>
+          </p>
+        </CardContent>
+      </>
+    );
   };
 
   return (
@@ -199,119 +384,7 @@ const Auth = () => {
           </Link>
 
           <Card variant="glass" className="border-border/30">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">
-                {isLogin ? "Welcome Back" : "Create Account"}
-              </CardTitle>
-              <CardDescription>
-                {isLogin
-                  ? "Sign in to continue your journey"
-                  : "Join the ModGarage community"}
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              {/* Role Selector (Sign Up Only) */}
-              {!isLogin && (
-                <div className="flex gap-2 mb-6">
-                  <Button
-                    type="button"
-                    variant={role === "customer" ? "default" : "secondary"}
-                    className="flex-1"
-                    onClick={() => setRole("customer")}
-                  >
-                    Customer
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={role === "seller" ? "default" : "secondary"}
-                    className="flex-1"
-                    onClick={() => setRole("seller")}
-                  >
-                    Seller
-                  </Button>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      type="text"
-                      placeholder="Full Name"
-                      className="pl-10"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required={!isLogin}
-                    />
-                  </div>
-                )}
-
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="Email Address"
-                    className="pl-10"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="pl-10 pr-10"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-
-                <Button type="submit" variant="hero" className="w-full group" disabled={loading}>
-                  {loading ? (
-                    "Please wait..."
-                  ) : (
-                    <>
-                      {isLogin ? "Sign In" : "Create Account"}
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <p className="text-center text-sm text-muted-foreground mt-6">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-primary hover:underline font-medium"
-                >
-                  {isLogin ? "Sign up" : "Sign in"}
-                </button>
-              </p>
-            </CardContent>
+            {renderForm()}
           </Card>
         </motion.div>
       </div>
