@@ -33,8 +33,8 @@ const Header = () => {
               <div className="absolute inset-0 bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
             <span className="font-display text-xl font-bold tracking-wider">
-              <span className="text-primary">MOD</span>
-              <span className="text-foreground">GARAGE</span>
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
             </span>
           </Link>
 

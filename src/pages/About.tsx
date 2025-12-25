@@ -43,7 +43,7 @@ const About = () => {
             className="text-center mb-16"
           >
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-6">
-              About <span className="text-gradient">ModGarage</span>
+              About <span className="text-gradient">Automods</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               India's premier car modification platform. We're passionate about helping car enthusiasts
@@ -80,7 +80,7 @@ const About = () => {
               <h2 className="font-display text-3xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Founded in 2020, ModGarage was born from a simple idea: make car customization
+                  Founded in 2020, Automods was born from a simple idea: make car customization
                   accessible to everyone. We noticed that finding quality parts, reliable sellers,
                   and visualizing modifications was a challenge for most car enthusiasts in India.
                 </p>

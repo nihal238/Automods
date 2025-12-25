@@ -119,7 +119,7 @@ const Auth = () => {
 
         toast({
           title: "Account Created!",
-          description: "Welcome to ModGarage!",
+          description: "Welcome to Automods!",
         });
         navigate("/");
       }
@@ -193,7 +193,7 @@ const Auth = () => {
           <CardDescription>
             {view === "login"
               ? "Sign in to continue your journey"
-              : "Join the ModGarage community"}
+              : "Join the Automods community"}
           </CardDescription>
         </CardHeader>
 
@@ -318,8 +318,8 @@ const Auth = () => {
           <Link to="/" className="flex items-center gap-3 mb-12">
             <Car className="h-10 w-10 text-primary" />
             <span className="font-display text-2xl font-bold tracking-wider">
-              <span className="text-primary">MOD</span>
-              <span className="text-foreground">GARAGE</span>
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
             </span>
           </Link>
 
@@ -378,8 +378,8 @@ const Auth = () => {
           <Link to="/" className="flex lg:hidden items-center gap-2 justify-center mb-8">
             <Car className="h-8 w-8 text-primary" />
             <span className="font-display text-xl font-bold tracking-wider">
-              <span className="text-primary">MOD</span>
-              <span className="text-foreground">GARAGE</span>
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
             </span>
           </Link>
 
