@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Menu, X, Car, User, ShoppingCart, LogOut } from "lucide-react";
+import { Menu, X, Car, User, ShoppingCart, LogOut, Store, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -9,7 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, role, signOut } = useAuth();
   const { totalItems } = useCart();
 
   const navLinks = [
@@ -75,10 +75,28 @@ const Header = () => {
             </Link>
 
             {user ? (
-              <Button variant="outline" size="sm" className="hidden md:flex gap-2" onClick={signOut}>
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
+              <div className="hidden md:flex items-center gap-2">
+                {(role === "seller" || role === "admin") && (
+                  <Link to="/seller">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <Store className="h-4 w-4" />
+                      Seller
+                    </Button>
+                  </Link>
+                )}
+                {role === "admin" && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                <Button variant="outline" size="sm" className="gap-2" onClick={signOut}>
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               <Link to="/auth">
                 <Button variant="outline" size="sm" className="hidden md:flex gap-2">
