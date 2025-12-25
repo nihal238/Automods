@@ -20,8 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Search, UserCheck, UserX, Shield } from "lucide-react";
+import { Search, UserCheck, UserX, Shield, Trash2, XCircle } from "lucide-react";
 
 interface UserWithRole {
   id: string;
@@ -103,6 +114,50 @@ const AdminUsers = () => {
     },
     onError: (error) => {
       toast.error("Failed to update seller status");
+      console.error(error);
+    },
+  });
+
+  const removeSellerMutation = useMutation({
+    mutationFn: async ({ userId }: { userId: string }) => {
+      // Delete seller's products first
+      const { error: productsError } = await supabase
+        .from("products")
+        .delete()
+        .eq("seller_id", userId);
+
+      if (productsError) throw productsError;
+
+      // Delete seller's order items (set seller_id to null to preserve order history)
+      const { error: orderItemsError } = await supabase
+        .from("order_items")
+        .update({ seller_id: null })
+        .eq("seller_id", userId);
+
+      if (orderItemsError) throw orderItemsError;
+
+      // Delete user role
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId);
+
+      if (roleError) throw roleError;
+
+      // Delete profile (this will cascade and handle other data via database policies)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("user_id", userId);
+
+      if (profileError) throw profileError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Seller removed and all their data deleted");
+    },
+    onError: (error) => {
+      toast.error("Failed to remove seller");
       console.error(error);
     },
   });
@@ -191,7 +246,7 @@ const AdminUsers = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Seller Approved</TableHead>
+                <TableHead>Seller Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -253,6 +308,7 @@ const AdminUsers = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {/* Approve Seller Button */}
                       {user.role === "seller" && !user.seller_approved && (
                         <Button
                           size="sm"
@@ -268,9 +324,28 @@ const AdminUsers = () => {
                           Approve
                         </Button>
                       )}
+
+                      {/* Revoke Seller Approval Button */}
+                      {user.role === "seller" && user.seller_approved && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            approveSellerMutation.mutate({
+                              userId: user.user_id,
+                              approved: false,
+                            })
+                          }
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Revoke
+                        </Button>
+                      )}
+
+                      {/* Block/Unblock Button */}
                       <Button
                         size="sm"
-                        variant={user.is_blocked ? "outline" : "destructive"}
+                        variant={user.is_blocked ? "outline" : "secondary"}
                         onClick={() =>
                           toggleBlockMutation.mutate({
                             userId: user.user_id,
@@ -290,6 +365,42 @@ const AdminUsers = () => {
                           </>
                         )}
                       </Button>
+
+                      {/* Remove Seller Button - Only for sellers */}
+                      {user.role === "seller" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove Seller</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove this seller? This will:
+                                <ul className="list-disc list-inside mt-2 space-y-1">
+                                  <li>Delete all their products</li>
+                                  <li>Remove their account from the system</li>
+                                  <li>Prevent them from logging in</li>
+                                </ul>
+                                <p className="mt-2 font-semibold text-destructive">
+                                  This action cannot be undone.
+                                </p>
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => removeSellerMutation.mutate({ userId: user.user_id })}
+                              >
+                                Remove Seller
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
