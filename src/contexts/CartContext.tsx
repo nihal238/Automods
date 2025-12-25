@@ -102,8 +102,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      // Fetch current product stock
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .select("stock, name")
+        .eq("id", productId)
+        .single();
+
+      if (productError) throw productError;
+
+      if (!product || product.stock <= 0) {
+        toast({
+          title: "Out of stock",
+          description: "This product is currently out of stock",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Check if item already exists in cart
       const existingItem = items.find((item) => item.product_id === productId);
+      const currentQuantityInCart = existingItem?.quantity || 0;
+      const newTotalQuantity = currentQuantityInCart + quantity;
+
+      // Validate against available stock
+      if (newTotalQuantity > product.stock) {
+        const canAdd = product.stock - currentQuantityInCart;
+        if (canAdd <= 0) {
+          toast({
+            title: "Maximum quantity reached",
+            description: `You already have the maximum available quantity (${product.stock}) in your cart`,
+            variant: "destructive",
+          });
+          return;
+        }
+        toast({
+          title: "Limited stock",
+          description: `Only ${canAdd} more unit(s) available. Adding ${canAdd} to cart.`,
+        });
+        quantity = canAdd;
+      }
 
       if (existingItem) {
         // Update quantity
@@ -146,6 +184,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (quantity <= 0) {
         await removeFromCart(productId);
         return;
+      }
+
+      // Fetch current product stock
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .select("stock")
+        .eq("id", productId)
+        .single();
+
+      if (productError) throw productError;
+
+      // Validate against available stock
+      if (quantity > product.stock) {
+        toast({
+          title: "Limited stock",
+          description: `Only ${product.stock} unit(s) available`,
+          variant: "destructive",
+        });
+        quantity = product.stock;
       }
 
       const { error } = await supabase
