@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Calendar, DollarSign } from "lucide-react";
+import { Package, Calendar, IndianRupee } from "lucide-react";
 import { format } from "date-fns";
+import { formatPrice } from "@/lib/currency";
 
 interface OrderItem {
   id: string;
@@ -149,11 +150,11 @@ const SellerOrders = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-primary flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        {((item.price * item.quantity) / 100).toFixed(2)}
+                        <IndianRupee className="h-4 w-4" />
+                        {formatPrice(item.price * item.quantity).replace("₹", "")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        ${(item.price / 100).toFixed(2)} each
+                        {formatPrice(item.price)} each
                       </p>
                     </div>
                   </div>

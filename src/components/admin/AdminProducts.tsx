@@ -26,7 +26,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Search, Package, Trash2, DollarSign } from "lucide-react";
+import { Search, Package, Trash2, IndianRupee } from "lucide-react";
+import { formatPrice } from "@/lib/currency";
 
 const AdminProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -151,8 +152,8 @@ const AdminProducts = () => {
                   </TableCell>
                   <TableCell>
                     <span className="flex items-center text-primary font-medium">
-                      <DollarSign className="h-3 w-3" />
-                      {(product.price / 100).toFixed(2)}
+                      <IndianRupee className="h-3 w-3" />
+                      {formatPrice(product.price).replace("₹", "")}
                     </span>
                   </TableCell>
                   <TableCell>

@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, ShoppingBag, DollarSign, Wrench, Car } from "lucide-react";
+import { Users, Package, ShoppingBag, IndianRupee, Wrench, Car } from "lucide-react";
+import { formatPrice } from "@/lib/currency";
 
 const AdminStats = () => {
   const { data: stats, isLoading } = useQuery({
@@ -71,8 +72,8 @@ const AdminStats = () => {
     },
     {
       title: "Total Revenue",
-      value: `$${((stats?.totalRevenue || 0) / 100).toFixed(2)}`,
-      icon: DollarSign,
+      value: formatPrice(stats?.totalRevenue || 0),
+      icon: IndianRupee,
       color: "text-primary",
     },
     {

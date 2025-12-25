@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { formatPrice } from "@/lib/currency";
 
 interface ProductListProps {
   onEdit: (productId: string) => void;
@@ -129,11 +130,11 @@ const ProductList = ({ onEdit }: ProductListProps) => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-2xl font-bold text-foreground">
-                  ${(product.price / 100).toFixed(2)}
+                  {formatPrice(product.price)}
                 </p>
                 {product.original_price && (
                   <p className="text-sm text-muted-foreground line-through">
-                    ${(product.original_price / 100).toFixed(2)}
+                    {formatPrice(product.original_price)}
                   </p>
                 )}
               </div>

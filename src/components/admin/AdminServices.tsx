@@ -33,7 +33,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Wrench, Plus, Pencil, Trash2, DollarSign } from "lucide-react";
+import { Wrench, Plus, Pencil, Trash2, IndianRupee } from "lucide-react";
+import { formatPrice } from "@/lib/currency";
 
 interface Service {
   id: string;
@@ -203,7 +204,7 @@ const AdminServices = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="base_price">Base Price ($)</Label>
+                  <Label htmlFor="base_price">Base Price (₹)</Label>
                   <Input
                     id="base_price"
                     type="number"
@@ -267,8 +268,8 @@ const AdminServices = () => {
                   <TableCell>{service.category}</TableCell>
                   <TableCell>
                     <span className="flex items-center text-primary font-medium">
-                      <DollarSign className="h-3 w-3" />
-                      {(service.base_price / 100).toFixed(2)}
+                      <IndianRupee className="h-3 w-3" />
+                      {formatPrice(service.base_price).replace("₹", "")}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
