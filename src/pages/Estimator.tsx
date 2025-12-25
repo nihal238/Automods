@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Calculator, Car, Wrench, IndianRupee, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ const Estimator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const { brands, loading: brandsLoading } = useCarBrands();
   const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
@@ -173,20 +174,19 @@ const Estimator = () => {
                                   : "border-border/50 bg-secondary/30 hover:border-primary/30"
                               }`}
                             >
-                              {model.image_url ? (
+                              {model.image_url && !failedImages.has(model.id) ? (
                                 <div className="w-full h-16 rounded-lg overflow-hidden mb-2">
                                   <img
                                     src={model.image_url}
                                     alt={model.name}
                                     className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                      e.currentTarget.parentElement!.innerHTML = '<div class="h-full flex items-center justify-center"><svg class="h-8 w-8 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0m10 0m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0m-9-2h10V8l3 3H3v4l2 2z"/></svg></div>';
-                                    }}
+                                    onError={() => setFailedImages(prev => new Set(prev).add(model.id))}
                                   />
                                 </div>
                               ) : (
-                                <Car className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                                <div className="w-full h-16 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
+                                  <Car className="h-8 w-8 text-muted-foreground" />
+                                </div>
                               )}
                               <p className="text-sm font-medium text-center">{model.name}</p>
                             </button>
