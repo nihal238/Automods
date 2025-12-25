@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { useProducts } from "@/hooks/useProducts";
+import { useCart } from "@/contexts/CartContext";
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");

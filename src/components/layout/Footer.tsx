@@ -2,6 +2,22 @@ import { Link } from "react-router-dom";
 import { Car, Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
+  const quickLinks = [
+    { name: "3D Customize", path: "/customize" },
+    { name: "Marketplace", path: "/marketplace" },
+    { name: "Estimator", path: "/estimator" },
+    { name: "Services", path: "/services" },
+    { name: "About Us", path: "/about" },
+  ];
+
+  const serviceLinks = [
+    { name: "Body Kits", path: "/marketplace?category=bodykits" },
+    { name: "Performance Parts", path: "/marketplace?category=performance" },
+    { name: "Interior Mods", path: "/marketplace?category=interior" },
+    { name: "Wheels & Tires", path: "/marketplace?category=wheels" },
+    { name: "Lighting", path: "/marketplace?category=lighting" },
+  ];
+
   return (
     <footer className="bg-secondary/30 border-t border-border/30">
       <div className="container mx-auto px-4 py-12">
@@ -20,16 +36,16 @@ const Footer = () => {
               3D visualization, and expert modifications.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Youtube className="h-5 w-5" />
               </a>
             </div>
@@ -41,11 +57,14 @@ const Footer = () => {
               Quick Links
             </h3>
             <ul className="space-y-2">
-              {["3D Customize", "Marketplace", "Estimator", "Car Models", "Sellers"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                    {item}
-                  </a>
+              {quickLinks.map((item) => (
+                <li key={item.name}>
+                  <Link 
+                    to={item.path} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -57,11 +76,14 @@ const Footer = () => {
               Services
             </h3>
             <ul className="space-y-2">
-              {["Body Kits", "Performance Parts", "Interior Mods", "Paint & Wrap", "Wheels & Tires"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                    {item}
-                  </a>
+              {serviceLinks.map((item) => (
+                <li key={item.name}>
+                  <Link 
+                    to={item.path} 
+                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -86,6 +108,12 @@ const Footer = () => {
                 support@modgarage.in
               </li>
             </ul>
+            <Link 
+              to="/contact" 
+              className="inline-block mt-4 text-primary text-sm hover:underline"
+            >
+              Send us a message →
+            </Link>
           </div>
         </div>
 
@@ -94,12 +122,12 @@ const Footer = () => {
             © 2024 ModGarage. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+            <Link to="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+            </Link>
+            <Link to="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>
