@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Menu, X, Car, User, ShoppingCart, LogOut, Store, Shield } from "lucide-react";
+import { Menu, X, Car, User, ShoppingCart, LogOut, Store, Shield, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
@@ -76,6 +76,12 @@ const Header = () => {
 
             {user ? (
               <div className="hidden md:flex items-center gap-2">
+                <Link to="/my-orders">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Package className="h-4 w-4" />
+                    My Orders
+                  </Button>
+                </Link>
                 {(role === "seller" || role === "admin") && (
                   <Link to="/seller">
                     <Button variant="ghost" size="sm" className="gap-2">
@@ -134,10 +140,18 @@ const Header = () => {
                 </Link>
               ))}
               {user ? (
-                <Button variant="outline" className="w-full mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
+                <>
+                  <Link to="/my-orders" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Package className="h-4 w-4 mr-2" />
+                      My Orders
+                    </Button>
+                  </Link>
+                  <Button variant="outline" className="w-full mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
                   <Button variant="outline" className="w-full mt-2">
