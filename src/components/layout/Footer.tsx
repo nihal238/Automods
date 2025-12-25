@@ -27,13 +27,13 @@ const Footer = () => {
             <Link to="/" className="flex items-center gap-2">
               <Car className="h-8 w-8 text-primary" />
               <span className="font-display text-xl font-bold tracking-wider">
-                <span className="text-primary">MOD</span>
-                <span className="text-foreground">GARAGE</span>
+                <span className="text-primary">AUTO</span>
+                <span className="text-foreground">MODS</span>
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               India's premier car modification platform. Transform your ride with custom parts, 
-              3D visualization, and expert modifications.
+              3D visualization, and expert modifications with Automods.
             </p>
             <div className="flex gap-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
@@ -105,7 +105,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-muted-foreground text-sm">
                 <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                support@modgarage.in
+                support@automods.in
               </li>
             </ul>
             <Link 
@@ -119,7 +119,7 @@ const Footer = () => {
 
         <div className="border-t border-border/30 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2024 ModGarage. All rights reserved.
+            © 2024 Automods. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link to="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">

@@ -65,7 +65,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Address",
-      details: ["ModGarage Headquarters", "Andheri West, Mumbai", "Maharashtra 400053"],
+      details: ["Automods Headquarters", "Andheri West, Mumbai", "Maharashtra 400053"],
     },
     {
       icon: Phone,
@@ -75,7 +75,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email",
-      details: ["support@modgarage.in", "sales@modgarage.in"],
+      details: ["support@automods.in", "sales@automods.in"],
     },
   ];
 

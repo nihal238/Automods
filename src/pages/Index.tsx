@@ -288,7 +288,7 @@ const Index = () => {
               Ready to <span className="text-gradient">Modify</span> Your Ride?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of car enthusiasts who have transformed their vehicles with ModGarage. 
+              Join thousands of car enthusiasts who have transformed their vehicles with Automods. 
               Start your customization journey today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
