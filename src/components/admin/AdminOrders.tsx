@@ -69,7 +69,21 @@ interface OrderItem {
   } | null;
 }
 
-const orderStatuses = ["pending", "processing", "completed", "cancelled"];
+const orderStatuses = [
+  "pending",
+  "processing", 
+  "confirmed",
+  "on_hold",
+  "shipped",
+  "out_for_delivery",
+  "delivered",
+  "cancelled",
+  "failed",
+  "refund_pending",
+  "refunded",
+  "returned",
+  "replacement",
+];
 
 const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -140,13 +154,38 @@ const AdminOrders = () => {
         return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
       case "processing":
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "completed":
+      case "confirmed":
+        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+      case "on_hold":
+        return "bg-orange-500/20 text-orange-400 border-orange-500/30";
+      case "shipped":
+        return "bg-indigo-500/20 text-indigo-400 border-indigo-500/30";
+      case "out_for_delivery":
+        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+      case "delivered":
         return "bg-green-500/20 text-green-400 border-green-500/30";
       case "cancelled":
         return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "failed":
+        return "bg-rose-500/20 text-rose-400 border-rose-500/30";
+      case "refund_pending":
+        return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+      case "refunded":
+        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+      case "returned":
+        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
+      case "replacement":
+        return "bg-teal-500/20 text-teal-400 border-teal-500/30";
       default:
         return "bg-muted text-muted-foreground";
     }
+  };
+
+  const formatStatusLabel = (status: string) => {
+    return status
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   const filteredOrders = orders?.filter((order) => {
@@ -181,14 +220,14 @@ const AdminOrders = () => {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               {orderStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {formatStatusLabel(status)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -232,15 +271,17 @@ const AdminOrders = () => {
                         updateStatusMutation.mutate({ orderId: order.id, status: value })
                       }
                     >
-                      <SelectTrigger className="w-[130px]">
+                      <SelectTrigger className="w-[160px]">
                         <Badge className={getStatusColor(order.status)}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          {formatStatusLabel(order.status)}
                         </Badge>
                       </SelectTrigger>
                       <SelectContent>
                         {orderStatuses.map((status) => (
                           <SelectItem key={status} value={status}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                            <Badge className={`${getStatusColor(status)} text-xs`}>
+                              {formatStatusLabel(status)}
+                            </Badge>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -248,7 +289,7 @@ const AdminOrders = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {order.status !== "cancelled" && order.status !== "completed" && (
+                      {!["cancelled", "delivered", "failed", "refunded", "returned"].includes(order.status) && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button size="sm" variant="destructive">
@@ -293,7 +334,7 @@ const AdminOrders = () => {
                             <div>
                               <span className="text-muted-foreground text-sm">Status:</span>
                               <Badge className={`${getStatusColor(order.status)} ml-2`}>
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                {formatStatusLabel(order.status)}
                               </Badge>
                             </div>
                             <div>
