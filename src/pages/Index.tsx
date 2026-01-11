@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+,import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Wrench, Palette, ShoppingBag, Gauge, Shield, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,7 +64,7 @@ const Index = () => {
       name: "Honda City",
       brand: "Honda",
       mods: 201,
-      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80",
+      image: "https://images.unsplash.com/?Honda city,blacke,w=600&q=80",
     },
     {
       name: "Mahindra Thar",
