@@ -136,16 +136,39 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
+    // Validate admin email is set
+    if (!adminEmail) {
+      console.error("ADMIN_EMAIL not configured");
+      return new Response(
+        JSON.stringify({ error: "Admin email not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Sending email to:", adminEmail);
+
     const emailResponse = await resend.emails.send({
       from: "CarMods <onboarding@resend.dev>",
-      to: [adminEmail!],
+      to: [adminEmail],
       subject: subject,
       html: emailHtml,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Resend response:", JSON.stringify(emailResponse));
 
-    return new Response(JSON.stringify({ success: true, data: emailResponse }), {
+    // Check if Resend returned an error
+    if (emailResponse.error) {
+      console.error("Resend error:", emailResponse.error);
+      return new Response(
+        JSON.stringify({ 
+          error: emailResponse.error.message,
+          details: "For testing, verify your domain at resend.com/domains"
+        }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    return new Response(JSON.stringify({ success: true, id: emailResponse.data?.id }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
