@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CustomizerScene, { type CustomizerSceneRef } from "@/components/customizer/CustomizerScene";
 import CustomizationPanel from "@/components/customizer/CustomizationPanel";
 import PreviewModal from "@/components/customizer/PreviewModal";
+import { QuoteFormDialog } from "@/components/QuoteFormDialog";
 
 const Customize = () => {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -32,6 +33,7 @@ const Customize = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
 
   const sceneRef = useRef<CustomizerSceneRef>(null);
 
@@ -375,9 +377,9 @@ const Customize = () => {
                     <Button 
                       variant="hero" 
                       className="flex-1"
-                      onClick={handlePreview}
+                      onClick={() => setShowQuoteForm(true)}
                     >
-                      Preview & Export
+                      Get Quote
                     </Button>
                   </div>
                 </div>
@@ -400,6 +402,17 @@ const Customize = () => {
         onShare={handleShare}
         onSave={handleSaveDesign}
         isSaving={isSaving}
+      />
+
+      {/* Quote Form Dialog */}
+      <QuoteFormDialog
+        open={showQuoteForm}
+        onOpenChange={setShowQuoteForm}
+        carBrand={selectedBrandData?.name}
+        carModel={selectedModelData?.name}
+        customizations={customization}
+        estimatedPrice={totalPrice}
+        requestType="customizer"
       />
     </div>
   );
