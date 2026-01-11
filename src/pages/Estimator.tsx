@@ -8,12 +8,14 @@ import Footer from "@/components/layout/Footer";
 import { useCarBrands, useCarModels } from "@/hooks/useCarData";
 import { useServices } from "@/hooks/useServices";
 import { toast } from "@/hooks/use-toast";
+import { QuoteFormDialog } from "@/components/QuoteFormDialog";
 
 const Estimator = () => {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
 
   const { brands, loading: brandsLoading } = useCarBrands();
   const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
@@ -50,11 +52,13 @@ const Estimator = () => {
       return;
     }
 
-    toast({
-      title: "Quote Requested!",
-      description: `We'll contact you soon with a detailed quote for ${formatPrice(totalCost)}`,
-    });
+    setShowQuoteForm(true);
   };
+
+  const selectedServiceNames = selectedServices.map((serviceId) => {
+    const service = services.find((s) => s.id === serviceId);
+    return service?.name || "";
+  }).filter(Boolean);
 
   const selectedBrandData = brands.find((b) => b.id === selectedBrand);
   const selectedModelData = models.find((m) => m.id === selectedModel);
@@ -351,6 +355,16 @@ const Estimator = () => {
       </main>
 
       <Footer />
+
+      <QuoteFormDialog
+        open={showQuoteForm}
+        onOpenChange={setShowQuoteForm}
+        carBrand={selectedBrandData?.name}
+        carModel={selectedModelData?.name}
+        selectedServices={selectedServiceNames}
+        estimatedPrice={totalCost}
+        requestType="estimator"
+      />
     </div>
   );
 };
