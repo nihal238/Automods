@@ -42,12 +42,42 @@ const Index = () => {
   ];
 
   const popularCars = [
-    { name: "Maruti Swift", brand: "Maruti Suzuki", mods: 245 },
-    { name: "Hyundai i20", brand: "Hyundai", mods: 189 },
-    { name: "Tata Nexon", brand: "Tata", mods: 167 },
-    { name: "Honda City", brand: "Honda", mods: 201 },
-    { name: "Mahindra Thar", brand: "Mahindra", mods: 312 },
-    { name: "VW Polo", brand: "Volkswagen", mods: 156 },
+    { 
+      name: "Maruti Swift", 
+      brand: "Maruti Suzuki", 
+      mods: 245,
+      image: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80"
+    },
+    { 
+      name: "Hyundai i20", 
+      brand: "Hyundai", 
+      mods: 189,
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80"
+    },
+    { 
+      name: "Tata Nexon", 
+      brand: "Tata", 
+      mods: 167,
+      image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=600&q=80"
+    },
+    { 
+      name: "Honda City", 
+      brand: "Honda", 
+      mods: 201,
+      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80"
+    },
+    { 
+      name: "Mahindra Thar", 
+      brand: "Mahindra", 
+      mods: 312,
+      image: "https://images.unsplash.com/photo-1625231334168-30dc27833109?w=600&q=80"
+    },
+    { 
+      name: "VW Polo", 
+      brand: "Volkswagen", 
+      mods: 156,
+      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80"
+    },
   ];
 
   return (
@@ -247,14 +277,15 @@ const Index = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card variant="elevated" className="group cursor-pointer hover:border-primary/30 transition-all duration-300 overflow-hidden">
-                  <div className="aspect-video bg-gradient-to-br from-secondary to-muted relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-6xl font-display font-bold text-muted-foreground/20">
-                        {car.name.split(" ")[0].substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
+                  <div className="aspect-video bg-gradient-to-br from-secondary to-muted relative overflow-hidden">
+                    <img 
+                      src={car.image} 
+                      alt={car.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                     <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-display">
+                      <span className="px-3 py-1 rounded-full bg-primary/20 backdrop-blur-sm text-primary text-xs font-display">
                         {car.mods} mods
                       </span>
                     </div>
