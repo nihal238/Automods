@@ -46,7 +46,7 @@ const Index = () => {
       name: "Maruti Swift", 
       brand: "Maruti Suzuki", 
       mods: 245,
-      image: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80"
+      image: "https://www.hyundai.com/content/dam/hyundai/in/en/data/find-a-car/Creta/Highlights/mob/cretagallerys3.jpg""
     },
     { 
       name: "Hyundai i20", 
