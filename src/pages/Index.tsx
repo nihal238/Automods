@@ -1,4 +1,4 @@
-,import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Wrench, Palette, ShoppingBag, Gauge, Shield, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
