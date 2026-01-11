@@ -1,162 +1,53 @@
-import { Suspense, useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, PerspectiveCamera } from "@react-three/drei";
-import { Palette, RotateCcw, Save, Share2, Sparkles, Loader2 } from "lucide-react";
+import { 
+  RotateCcw, 
+  Save, 
+  Share2, 
+  Sparkles, 
+  Eye, 
+  Download,
+  RotateCw,
+  Pause,
+  Play,
+  ZoomIn,
+  ZoomOut,
+  Move
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { useCarBrands, useCarModels } from "@/hooks/useCarData";
-import { useServices } from "@/hooks/useServices";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCarCustomization } from "@/hooks/useCarCustomization";
 import { toast } from "@/hooks/use-toast";
-import * as THREE from "three";
-
-// Simple 3D Car Component
-function CarModel({ color }: { color: string }) {
-  const meshRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
-    }
-  });
-
-  return (
-    <group ref={meshRef} position={[0, -0.5, 0]}>
-      {/* Car Body */}
-      <mesh position={[0, 0.5, 0]}>
-        <boxGeometry args={[3, 0.8, 1.4]} />
-        <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
-      </mesh>
-      
-      {/* Car Top/Cabin */}
-      <mesh position={[0.2, 1.1, 0]}>
-        <boxGeometry args={[1.8, 0.6, 1.2]} />
-        <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
-      </mesh>
-
-      {/* Front Hood Slope */}
-      <mesh position={[-1, 0.7, 0]} rotation={[0, 0, -0.3]}>
-        <boxGeometry args={[0.8, 0.3, 1.3]} />
-        <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} />
-      </mesh>
-
-      {/* Windows - Front */}
-      <mesh position={[-0.5, 1.1, 0]}>
-        <boxGeometry args={[0.1, 0.4, 1]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.9} roughness={0.1} />
-      </mesh>
-
-      {/* Windows - Rear */}
-      <mesh position={[1, 1.1, 0]}>
-        <boxGeometry args={[0.1, 0.4, 1]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.9} roughness={0.1} />
-      </mesh>
-
-      {/* Wheels */}
-      {[
-        [-1, 0, 0.7],
-        [-1, 0, -0.7],
-        [1, 0, 0.7],
-        [1, 0, -0.7],
-      ].map((pos, i) => (
-        <group key={i} position={pos as [number, number, number]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.35, 0.35, 0.2, 32]} />
-            <meshStandardMaterial color="#1a1a1a" metalness={0.5} roughness={0.3} />
-          </mesh>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.25, 0.25, 0.22, 6]} />
-            <meshStandardMaterial color="#888888" metalness={0.9} roughness={0.1} />
-          </mesh>
-        </group>
-      ))}
-
-      {/* Headlights */}
-      <mesh position={[-1.5, 0.5, 0.4]}>
-        <boxGeometry args={[0.1, 0.2, 0.3]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffff00" emissiveIntensity={0.5} />
-      </mesh>
-      <mesh position={[-1.5, 0.5, -0.4]}>
-        <boxGeometry args={[0.1, 0.2, 0.3]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffff00" emissiveIntensity={0.5} />
-      </mesh>
-
-      {/* Taillights */}
-      <mesh position={[1.5, 0.5, 0.4]}>
-        <boxGeometry args={[0.1, 0.15, 0.3]} />
-        <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
-      </mesh>
-      <mesh position={[1.5, 0.5, -0.4]}>
-        <boxGeometry args={[0.1, 0.15, 0.3]} />
-        <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
-      </mesh>
-
-      {/* Ground plane for shadow/reflection effect */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color="#0a0a0f" metalness={0.9} roughness={0.1} />
-      </mesh>
-    </group>
-  );
-}
-
-function Scene({ color }: { color: string }) {
-  return (
-    <>
-      <PerspectiveCamera makeDefault position={[4, 2, 4]} fov={50} />
-      <OrbitControls
-        enablePan={false}
-        enableZoom={true}
-        minPolarAngle={Math.PI / 4}
-        maxPolarAngle={Math.PI / 2.2}
-        minDistance={4}
-        maxDistance={10}
-      />
-      <ambientLight intensity={0.3} />
-      <spotLight position={[10, 10, 5]} angle={0.3} penumbra={1} intensity={1} castShadow />
-      <spotLight position={[-10, 10, -5]} angle={0.3} penumbra={1} intensity={0.5} color="#ff4444" />
-      <pointLight position={[0, 5, 0]} intensity={0.5} />
-      <Environment preset="night" />
-      <CarModel color={color} />
-    </>
-  );
-}
+import { supabase } from "@/integrations/supabase/client";
+import CustomizerScene, { type CustomizerSceneRef } from "@/components/customizer/CustomizerScene";
+import CustomizationPanel from "@/components/customizer/CustomizationPanel";
+import PreviewModal from "@/components/customizer/PreviewModal";
 
 const Customize = () => {
-  const [selectedColor, setSelectedColor] = useState("#e63946");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [selectedMods, setSelectedMods] = useState<string[]>([]);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const sceneRef = useRef<CustomizerSceneRef>(null);
 
   const { brands, loading: brandsLoading } = useCarBrands();
   const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
-  const { services, loading: servicesLoading } = useServices();
   const { user } = useAuth();
+  const { 
+    customization, 
+    updateCustomization, 
+    resetCustomization, 
+    totalPrice,
+    hasModifications 
+  } = useCarCustomization();
 
-  const colors = [
-    { name: "Racing Red", value: "#e63946" },
-    { name: "Midnight Black", value: "#0a0a0f" },
-    { name: "Pearl White", value: "#f1f1f1" },
-    { name: "Electric Blue", value: "#0077b6" },
-    { name: "Sunset Orange", value: "#f77f00" },
-    { name: "Emerald Green", value: "#2d6a4f" },
-    { name: "Royal Purple", value: "#7209b7" },
-    { name: "Gunmetal Grey", value: "#495057" },
-  ];
-
-  const toggleMod = (modId: string) => {
-    setSelectedMods((prev) =>
-      prev.includes(modId) ? prev.filter((id) => id !== modId) : [...prev, modId]
-    );
-  };
-
-  const totalCost = selectedMods.reduce((acc, modId) => {
-    const service = services.find((s) => s.id === modId);
-    return acc + (service?.base_price || 0);
-  }, 0);
+  const selectedBrandData = brands.find((b) => b.id === selectedBrand);
+  const selectedModelData = models.find((m) => m.id === selectedModel);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -166,10 +57,64 @@ const Customize = () => {
     }).format(price);
   };
 
-  const selectedBrandData = brands.find((b) => b.id === selectedBrand);
-  const selectedModelData = models.find((m) => m.id === selectedModel);
+  const captureScreenshot = useCallback(async () => {
+    if (sceneRef.current) {
+      const url = await sceneRef.current.captureScreenshot();
+      setScreenshotUrl(url);
+      return url;
+    }
+    return null;
+  }, []);
 
-  const handleSaveDesign = () => {
+  const handlePreview = async () => {
+    await captureScreenshot();
+    setShowPreview(true);
+  };
+
+  const handleDownload = async () => {
+    let url = screenshotUrl;
+    if (!url) {
+      url = await captureScreenshot();
+    }
+    if (url) {
+      const link = document.createElement("a");
+      link.download = `${selectedBrandData?.name || "Custom"}-${selectedModelData?.name || "Car"}-config.png`;
+      link.href = url;
+      link.click();
+      toast({
+        title: "Image Downloaded!",
+        description: "Your custom car image has been saved",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    const configText = `Check out my custom ${selectedBrandData?.name || ""} ${selectedModelData?.name || "car"} build on Automods! Total: ${formatPrice(totalPrice)}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Custom Car Build - Automods",
+          text: configText,
+          url: window.location.href,
+        });
+      } catch {
+        await navigator.clipboard.writeText(configText);
+        toast({
+          title: "Link Copied!",
+          description: "Share link has been copied to clipboard",
+        });
+      }
+    } else {
+      await navigator.clipboard.writeText(configText);
+      toast({
+        title: "Link Copied!",
+        description: "Share link has been copied to clipboard",
+      });
+    }
+  };
+
+  const handleSaveDesign = async () => {
     if (!user) {
       toast({
         title: "Please sign in",
@@ -179,17 +124,62 @@ const Customize = () => {
       return;
     }
 
+    if (!selectedModel) {
+      toast({
+        title: "Select a car",
+        description: "Please select a car brand and model first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from("saved_designs").insert({
+        user_id: user.id,
+        car_model_id: selectedModel,
+        color: customization.bodyColor,
+        modifications: {
+          wheelType: customization.wheelType,
+          headlightType: customization.headlightType,
+          bumperType: customization.bumperType,
+          spoilerType: customization.spoilerType,
+          decalType: customization.decalType,
+        },
+        total_cost: totalPrice,
+        name: `${selectedBrandData?.name || ""} ${selectedModelData?.name || "Custom"} Build`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Design Saved!",
+        description: "Your custom design has been saved to your account",
+      });
+      setShowPreview(false);
+    } catch (error) {
+      console.error("Error saving design:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save design. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    resetCustomization();
     toast({
-      title: "Design Saved!",
-      description: "Your custom design has been saved to your account",
+      title: "Reset Complete",
+      description: "All customizations have been reset to default",
     });
   };
 
-  const handleShare = () => {
-    toast({
-      title: "Link Copied!",
-      description: "Share link has been copied to clipboard",
-    });
+  const handleBrandChange = (brandId: string) => {
+    setSelectedBrand(brandId);
+    setSelectedModel(null);
   };
 
   return (
@@ -200,216 +190,217 @@ const Customize = () => {
         <div className="h-[calc(100vh-5rem)] flex flex-col lg:flex-row">
           {/* 3D Viewer */}
           <div className="flex-1 relative bg-gradient-to-b from-background via-secondary/20 to-background">
-            <Canvas shadows>
-              <Suspense fallback={null}>
-                <Scene color={selectedColor} />
-              </Suspense>
-            </Canvas>
+            <CustomizerScene
+              ref={sceneRef}
+              customization={customization}
+              autoRotate={autoRotate}
+            />
 
-            {/* Overlay Controls */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
-              <Button variant="glass" size="sm" className="gap-2">
-                <RotateCcw className="h-4 w-4" />
-                Reset View
-              </Button>
-              <Button variant="glass" size="sm" className="gap-2" onClick={handleSaveDesign}>
-                <Save className="h-4 w-4" />
-                Save Design
-              </Button>
-              <Button variant="glass" size="sm" className="gap-2" onClick={handleShare}>
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
-            </div>
-
-            {/* Current Car Badge */}
+            {/* Overlay Controls - Top Left */}
             <div className="absolute top-6 left-6">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="px-4 py-2 rounded-lg bg-card/80 backdrop-blur-sm border border-border/30"
+                className="px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
               >
-                <p className="text-xs text-muted-foreground">Currently Viewing</p>
-                <p className="font-display font-bold">
+                <p className="text-xs text-muted-foreground">Currently Building</p>
+                <p className="font-display font-bold text-lg">
                   {selectedBrandData && selectedModelData
                     ? `${selectedBrandData.name} ${selectedModelData.name}`
-                    : "Select a car model"}
+                    : "Select a car to start"}
                 </p>
+                {hasModifications && (
+                  <p className="text-sm text-primary mt-1">
+                    +{formatPrice(totalPrice)} in mods
+                  </p>
+                )}
               </motion.div>
             </div>
+
+            {/* Viewer Controls - Top Right */}
+            <div className="absolute top-6 right-6 flex flex-col gap-2">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex flex-col gap-2 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setAutoRotate(!autoRotate)}
+                  title={autoRotate ? "Stop Rotation" : "Auto Rotate"}
+                  className="h-9 w-9"
+                >
+                  {autoRotate ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+                <div className="h-px bg-border/50" />
+                <Button variant="ghost" size="icon" title="Zoom In" className="h-9 w-9">
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" title="Zoom Out" className="h-9 w-9">
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" title="Pan/Move" className="h-9 w-9">
+                  <Move className="h-4 w-4" />
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* Control hints */}
+            <div className="absolute bottom-24 left-6">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="text-xs text-muted-foreground space-y-1"
+              >
+                <p>🖱️ Drag to rotate</p>
+                <p>🔍 Scroll to zoom</p>
+                <p>⌨️ Shift+drag to pan</p>
+              </motion.div>
+            </div>
+
+            {/* Bottom Action Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3"
+            >
+              <Button 
+                variant="glass" 
+                size="sm" 
+                className="gap-2"
+                onClick={handleReset}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reset
+              </Button>
+              <Button 
+                variant="glass" 
+                size="sm" 
+                className="gap-2"
+                onClick={handleDownload}
+              >
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+              <Button 
+                variant="glass" 
+                size="sm" 
+                className="gap-2" 
+                onClick={handleShare}
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
+              <Button 
+                variant="hero" 
+                size="sm" 
+                className="gap-2"
+                onClick={handlePreview}
+              >
+                <Eye className="h-4 w-4" />
+                Preview Build
+              </Button>
+            </motion.div>
           </div>
 
           {/* Customization Panel */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="w-full lg:w-96 border-l border-border/30 bg-card/50 backdrop-blur-xl overflow-y-auto"
+            className="w-full lg:w-[380px] xl:w-[420px] border-l border-border/30 bg-card/50 backdrop-blur-xl overflow-y-auto"
           >
-            <div className="p-6 space-y-6">
+            <div className="p-5 space-y-5">
               {/* Title */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-primary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-display font-bold text-lg">3D Customizer</h2>
+                    <p className="text-xs text-muted-foreground">Real-time preview</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-display font-bold text-lg">3D Customizer</h2>
-                  <p className="text-xs text-muted-foreground">Visualize your mods</p>
+                <div className="flex items-center gap-1">
+                  <RotateCw className="h-3 w-3 text-primary animate-spin" style={{ animationDuration: "3s" }} />
+                  <span className="text-xs text-primary">Live</span>
                 </div>
               </div>
 
-              {/* Brand Selection */}
-              <Card variant="glass">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Select Brand</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {brandsLoading ? (
-                    <div className="flex justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {brands.slice(0, 6).map((brand) => (
-                        <button
-                          key={brand.id}
-                          onClick={() => {
-                            setSelectedBrand(brand.id);
-                            setSelectedModel(null);
-                          }}
-                          className={`p-3 rounded-lg border text-left transition-all duration-300 ${
-                            selectedBrand === brand.id
-                              ? "border-primary bg-primary/10"
-                              : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                          }`}
-                        >
-                          <p className="text-xs text-muted-foreground">{brand.logo_code}</p>
-                          <p className="font-medium text-sm">{brand.name}</p>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Model Selection */}
-              {selectedBrand && (
-                <Card variant="glass">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Select Model</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {modelsLoading ? (
-                      <div className="flex justify-center py-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-2">
-                        {models.map((model) => (
-                          <button
-                            key={model.id}
-                            onClick={() => setSelectedModel(model.id)}
-                            className={`p-3 rounded-lg border text-left transition-all duration-300 ${
-                              selectedModel === model.id
-                                ? "border-primary bg-primary/10"
-                                : "border-border/50 bg-secondary/30 hover:border-primary/30"
-                            }`}
-                          >
-                            <p className="font-medium text-sm">{model.name}</p>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Color Selection */}
-              <Card variant="glass">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Palette className="h-4 w-4 text-primary" />
-                    Paint Color
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-4 gap-2">
-                    {colors.map((color) => (
-                      <button
-                        key={color.value}
-                        onClick={() => setSelectedColor(color.value)}
-                        className={`aspect-square rounded-lg border-2 transition-all duration-300 hover:scale-105 ${
-                          selectedColor === color.value
-                            ? "border-primary shadow-neon"
-                            : "border-transparent"
-                        }`}
-                        style={{ backgroundColor: color.value }}
-                        title={color.name}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3 text-center">
-                    Selected: {colors.find((c) => c.value === selectedColor)?.name}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Modifications */}
-              <Card variant="glass">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Modifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {servicesLoading ? (
-                    <div className="flex justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    </div>
-                  ) : (
-                    services.slice(0, 5).map((service) => (
-                      <button
-                        key={service.id}
-                        onClick={() => toggleMod(service.id)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${
-                          selectedMods.includes(service.id)
-                            ? "border-primary/30 bg-primary/5"
-                            : "border-border/50 bg-secondary/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-4 h-4 rounded border-2 ${
-                              selectedMods.includes(service.id)
-                                ? "border-primary bg-primary"
-                                : "border-muted-foreground"
-                            }`}
-                          />
-                          <span className="text-sm">{service.name}</span>
-                        </div>
-                        <span className="text-sm font-display text-primary">
-                          {formatPrice(service.base_price)}
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
+              {/* Customization Options */}
+              <CustomizationPanel
+                customization={customization}
+                onCustomizationChange={updateCustomization}
+                selectedBrand={selectedBrand}
+                selectedModel={selectedModel}
+                onBrandChange={handleBrandChange}
+                onModelChange={setSelectedModel}
+                brands={brands}
+                models={models}
+                brandsLoading={brandsLoading}
+                modelsLoading={modelsLoading}
+              />
 
               {/* Total & CTA */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 rounded-lg bg-primary/10 border border-primary/30">
-                  <span className="font-display font-bold">Total Cost</span>
-                  <span className="font-display font-bold text-xl text-gradient">
-                    {formatPrice(totalCost)}
-                  </span>
-                </div>
+              <div className="sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-card via-card to-transparent">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-4 rounded-xl bg-primary/10 border border-primary/30">
+                    <div>
+                      <span className="text-xs text-muted-foreground">Estimated Cost</span>
+                      <span className="block font-display font-bold text-2xl text-gradient">
+                        {formatPrice(totalPrice)}
+                      </span>
+                    </div>
+                    {hasModifications && (
+                      <div className="text-right">
+                        <span className="text-xs text-muted-foreground">Modifications</span>
+                        <span className="block text-sm font-medium text-primary">
+                          {Object.values(customization).filter(v => v !== "standard" && v !== "none" && v !== customization.bodyColor).length} upgrades
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-                <Button variant="hero" className="w-full">
-                  Get Quote for This Build
-                </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 gap-2"
+                      onClick={handleSaveDesign}
+                    >
+                      <Save className="h-4 w-4" />
+                      Save
+                    </Button>
+                    <Button 
+                      variant="hero" 
+                      className="flex-1"
+                      onClick={handlePreview}
+                    >
+                      Preview & Export
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </main>
+
+      {/* Preview Modal */}
+      <PreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        customization={customization}
+        totalPrice={totalPrice}
+        brandName={selectedBrandData?.name || null}
+        modelName={selectedModelData?.name || null}
+        screenshotUrl={screenshotUrl}
+        onDownload={handleDownload}
+        onShare={handleShare}
+        onSave={handleSaveDesign}
+        isSaving={isSaving}
+      />
     </div>
   );
 };
