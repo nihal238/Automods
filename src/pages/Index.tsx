@@ -42,41 +42,41 @@ const Index = () => {
   ];
 
   const popularCars = [
-    { 
-      name: "Maruti Swift", 
-      brand: "Maruti Suzuki", 
+    {
+      name: "Maruti Swift",
+      brand: "Maruti Suzuki",
       mods: 245,
-      image: "https://www.hyundai.com/content/dam/hyundai/in/en/data/find-a-car/Creta/Highlights/mob/cretagallerys3.jpg"
+      image: "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80",
     },
-    { 
-      name: "Hyundai i20", 
-      brand: "Hyundai", 
+    {
+      name: "Hyundai i20",
+      brand: "Hyundai",
       mods: 189,
-      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80"
+      image: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80",
     },
-    { 
-      name: "Tata Nexon", 
-      brand: "Tata", 
+    {
+      name: "Tata Nexon",
+      brand: "Tata",
       mods: 167,
-      image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=600&q=80"
+      image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=600&q=80",
     },
-    { 
-      name: "Honda City", 
-      brand: "Honda", 
+    {
+      name: "Honda City",
+      brand: "Honda",
       mods: 201,
-      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80"
+      image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80",
     },
-    { 
-      name: "Mahindra Thar", 
-      brand: "Mahindra", 
+    {
+      name: "Mahindra Thar",
+      brand: "Mahindra",
       mods: 312,
-      image: "https://images.unsplash.com/photo-1625231334168-30dc27833109?w=600&q=80"
+      image: "https://unsplash.com/photos/a-black-jeep-parked-on-a-dirt-road-kszV_-3Ka1k",
     },
-    { 
-      name: "VW Polo", 
-      brand: "Volkswagen", 
+    {
+      name: "VW Polo",
+      brand: "Volkswagen",
       mods: 156,
-      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80"
+      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80",
     },
   ];
 
@@ -88,11 +88,7 @@ const Index = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
-          <img
-            src={heroCar}
-            alt="Modified sports car"
-            className="w-full h-full object-cover object-center"
-          />
+          <img src={heroCar} alt="Modified sports car" className="w-full h-full object-cover object-center" />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
@@ -113,11 +109,7 @@ const Index = () => {
 
         <div className="container mx-auto px-4 relative z-10 pt-20">
           <div className="max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
               <span className="inline-block px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-display uppercase tracking-widest mb-6">
                 India's #1 Mod Platform
               </span>
@@ -140,8 +132,8 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl"
             >
-              Customize, visualize, and purchase modifications for your car. 
-              From body kits to performance parts – bring your vision to life.
+              Customize, visualize, and purchase modifications for your car. From body kits to performance parts – bring
+              your vision to life.
             </motion.p>
 
             <motion.div
@@ -176,9 +168,7 @@ const Index = () => {
                 { value: "500+", label: "Happy Customers" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <div className="font-display text-3xl font-bold text-primary">
-                    {stat.value}
-                  </div>
+                  <div className="font-display text-3xl font-bold text-primary">{stat.value}</div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               ))}
@@ -212,9 +202,7 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need
-            </h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Everything You Need</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               From visualization to purchase – we've got your entire modification journey covered
             </p>
@@ -254,12 +242,8 @@ const Index = () => {
             className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4"
           >
             <div>
-              <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">
-                Popular Indian Cars
-              </h2>
-              <p className="text-muted-foreground">
-                Most customized vehicles on our platform
-              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-bold mb-2">Popular Indian Cars</h2>
+              <p className="text-muted-foreground">Most customized vehicles on our platform</p>
             </div>
             <Button variant="outline">
               View All Cars
@@ -276,10 +260,13 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card variant="elevated" className="group cursor-pointer hover:border-primary/30 transition-all duration-300 overflow-hidden">
+                <Card
+                  variant="elevated"
+                  className="group cursor-pointer hover:border-primary/30 transition-all duration-300 overflow-hidden"
+                >
                   <div className="aspect-video bg-gradient-to-br from-secondary to-muted relative overflow-hidden">
-                    <img 
-                      src={car.image} 
+                    <img
+                      src={car.image}
                       alt={car.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -291,9 +278,7 @@ const Index = () => {
                     </div>
                   </div>
                   <CardContent className="pt-4">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                      {car.brand}
-                    </p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">{car.brand}</p>
                     <h3 className="font-display font-bold text-lg group-hover:text-primary transition-colors">
                       {car.name}
                     </h3>
@@ -319,8 +304,8 @@ const Index = () => {
               Ready to <span className="text-gradient">Modify</span> Your Ride?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of car enthusiasts who have transformed their vehicles with Automods. 
-              Start your customization journey today.
+              Join thousands of car enthusiasts who have transformed their vehicles with Automods. Start your
+              customization journey today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
