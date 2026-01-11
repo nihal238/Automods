@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         <h2 style="color: #1d3557; margin-top: 24px;">Estimated Price</h2>
         <p style="font-size: 24px; color: #e63946; font-weight: bold;">
-          ₹${data.estimatedPrice.toLocaleString("en-IN")}
+          ₹${(data.estimatedPrice ?? 0).toLocaleString("en-IN")}
         </p>
 
         <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;" />
