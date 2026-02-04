@@ -7,11 +7,12 @@ import {
   Wind, 
   Sticker,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { CarCustomization } from "./CustomizerScene";
+import type { CarCustomization } from "./RealisticCustomizerScene";
 import { useState } from "react";
 
 interface CustomizationPanelProps {
@@ -78,6 +79,14 @@ const decalOptions = [
   { value: "geometric", name: "Geometric", price: 15000 },
 ] as const;
 
+const ppfOptions = [
+  { value: "none", name: "No PPF", price: 0, description: "Standard paint finish" },
+  { value: "gloss", name: "Gloss PPF", price: 85000, description: "Ultra-shiny protective film" },
+  { value: "matte", name: "Matte PPF", price: 95000, description: "Satin matte finish protection" },
+  { value: "satin", name: "Satin PPF", price: 90000, description: "Semi-gloss refined finish" },
+  { value: "ceramic", name: "Ceramic Coating", price: 150000, description: "Premium 9H hardness coating" },
+] as const;
+
 export default function CustomizationPanel({
   customization,
   onCustomizationChange,
@@ -93,6 +102,7 @@ export default function CustomizationPanel({
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     brand: true,
     color: true,
+    ppf: true,
     wheels: false,
     headlights: false,
     bumpers: false,
@@ -219,6 +229,43 @@ export default function CustomizationPanel({
               <p className="text-xs text-muted-foreground mt-3 text-center">
                 {colors.find((c) => c.value === customization.bodyColor)?.name || "Custom"}
               </p>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      {/* PPF / Paint Protection */}
+      <Collapsible open={openSections.ppf} onOpenChange={() => toggleSection("ppf")}>
+        <Card variant="glass" className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                PPF & Coating
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-medium">NEW</span>
+              </CardTitle>
+              <ChevronDown className={`h-4 w-4 transition-transform ${openSections.ppf ? "rotate-180" : ""}`} />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="space-y-2">
+              {ppfOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => onCustomizationChange({ ppfType: option.value })}
+                  className={`w-full flex flex-col p-3 rounded-lg border transition-all duration-300 ${
+                    customization.ppfType === option.value
+                      ? "border-primary bg-primary/10"
+                      : "border-border/50 bg-secondary/30 hover:border-primary/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-sm font-medium">{option.name}</span>
+                    <span className="text-xs text-primary font-medium">{formatPrice(option.price)}</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground text-left mt-1">{option.description}</span>
+                </button>
+              ))}
             </CardContent>
           </CollapsibleContent>
         </Card>

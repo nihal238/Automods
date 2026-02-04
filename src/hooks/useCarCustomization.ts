@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
-import type { CarCustomization } from "@/components/customizer/CustomizerScene";
+import type { CarCustomization } from "@/components/customizer/RealisticCustomizerScene";
 
-// Price map for modifications
+// Price map for modifications (in INR)
 const modificationPrices = {
   wheelType: {
     standard: 0,
@@ -34,6 +34,13 @@ const modificationPrices = {
     tribal: 10000,
     geometric: 15000,
   },
+  ppfType: {
+    none: 0,
+    gloss: 85000,
+    matte: 95000,
+    satin: 90000,
+    ceramic: 150000,
+  },
 };
 
 const defaultCustomization: CarCustomization = {
@@ -43,6 +50,7 @@ const defaultCustomization: CarCustomization = {
   bumperType: "standard",
   spoilerType: "none",
   decalType: "none",
+  ppfType: "none",
 };
 
 export function useCarCustomization() {
@@ -63,6 +71,7 @@ export function useCarCustomization() {
     total += modificationPrices.bumperType[customization.bumperType];
     total += modificationPrices.spoilerType[customization.spoilerType];
     total += modificationPrices.decalType[customization.decalType];
+    total += modificationPrices.ppfType[customization.ppfType];
     return total;
   }, [customization]);
 
@@ -72,7 +81,8 @@ export function useCarCustomization() {
       customization.headlightType !== "standard" ||
       customization.bumperType !== "standard" ||
       customization.spoilerType !== "none" ||
-      customization.decalType !== "none"
+      customization.decalType !== "none" ||
+      customization.ppfType !== "none"
     );
   }, [customization]);
 
