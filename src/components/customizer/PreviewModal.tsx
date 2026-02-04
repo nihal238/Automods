@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Share2, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { CarCustomization } from "./CustomizerScene";
+import type { CarCustomization } from "./RealisticCustomizerScene";
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -50,6 +50,13 @@ const modificationLabels: Record<string, Record<string, string>> = {
     tribal: "Tribal Design",
     geometric: "Geometric Pattern",
   },
+  ppfType: {
+    none: "No PPF",
+    gloss: "Gloss PPF",
+    matte: "Matte PPF",
+    satin: "Satin PPF",
+    ceramic: "Ceramic Coating",
+  },
 };
 
 const colorNames: Record<string, string> = {
@@ -90,6 +97,7 @@ export default function PreviewModal({
 
   const modifications = [
     { label: "Body Color", value: colorNames[customization.bodyColor] || "Custom" },
+    { label: "PPF/Coating", value: modificationLabels.ppfType[customization.ppfType] },
     { label: "Wheels", value: modificationLabels.wheelType[customization.wheelType] },
     { label: "Headlights", value: modificationLabels.headlightType[customization.headlightType] },
     { label: "Bumpers", value: modificationLabels.bumperType[customization.bumperType] },

@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCarCustomization } from "@/hooks/useCarCustomization";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import CustomizerScene, { type CustomizerSceneRef } from "@/components/customizer/CustomizerScene";
+import RealisticCustomizerScene, { type RealisticCustomizerSceneRef } from "@/components/customizer/RealisticCustomizerScene";
 import CustomizationPanel from "@/components/customizer/CustomizationPanel";
 import PreviewModal from "@/components/customizer/PreviewModal";
 import { QuoteFormDialog } from "@/components/QuoteFormDialog";
@@ -35,7 +35,7 @@ const Customize = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
-  const sceneRef = useRef<CustomizerSceneRef>(null);
+  const sceneRef = useRef<RealisticCustomizerSceneRef>(null);
 
   const { brands, loading: brandsLoading } = useCarBrands();
   const { models, loading: modelsLoading } = useCarModels(selectedBrand || undefined);
@@ -147,6 +147,7 @@ const Customize = () => {
           bumperType: customization.bumperType,
           spoilerType: customization.spoilerType,
           decalType: customization.decalType,
+          ppfType: customization.ppfType,
         },
         total_cost: totalPrice,
         name: `${selectedBrandData?.name || ""} ${selectedModelData?.name || "Custom"} Build`,
@@ -191,8 +192,8 @@ const Customize = () => {
       <main className="pt-20">
         <div className="h-[calc(100vh-5rem)] flex flex-col lg:flex-row">
           {/* 3D Viewer */}
-          <div className="flex-1 relative bg-gradient-to-b from-background via-secondary/20 to-background">
-            <CustomizerScene
+          <div className="flex-1 relative bg-[#0a0a12]">
+            <RealisticCustomizerScene
               ref={sceneRef}
               customization={customization}
               autoRotate={autoRotate}
@@ -322,7 +323,7 @@ const Customize = () => {
                   </div>
                   <div>
                     <h2 className="font-display font-bold text-lg">3D Customizer</h2>
-                    <p className="text-xs text-muted-foreground">Real-time preview</p>
+                    <p className="text-xs text-muted-foreground">High-fidelity preview</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
