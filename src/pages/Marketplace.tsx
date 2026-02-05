@@ -10,18 +10,29 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useProducts } from "@/hooks/useProducts";
+import { useProducts, useFeaturedProducts } from "@/hooks/useProducts";
+import { Slider } from "@/components/ui/slider";
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
   // Fetch real products from database
-  const { products, loading } = useProducts(selectedCategory, searchQuery);
+  const { products, loading } = useProducts({
+    category: selectedCategory,
+    searchQuery,
+    minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
+    maxPrice: priceRange[1] < 10000000 ? priceRange[1] : undefined,
+  });
+  
+  // Fetch featured products (discounted items)
+  const { products: featuredProducts, loading: featuredLoading } = useFeaturedProducts();
 
   const categories = [
     { id: "all", name: "All Products" },
@@ -111,12 +122,49 @@ const Marketplace = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="secondary" className="gap-2">
+            <Button 
+              variant="secondary" 
+              className="gap-2"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="h-4 w-4" />
               Filters
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
           </motion.div>
+
+          {/* Price Filter Panel */}
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6 p-4 rounded-lg bg-card border border-border"
+            >
+              <h3 className="font-medium mb-4">Price Range</h3>
+              <div className="space-y-4">
+                <Slider
+                  value={priceRange}
+                  onValueChange={(value) => setPriceRange(value as [number, number])}
+                  min={0}
+                  max={10000000}
+                  step={10000}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{formatPrice(priceRange[0])}</span>
+                  <span>{formatPrice(priceRange[1])}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPriceRange([0, 10000000])}
+                >
+                  Reset Price
+                </Button>
+              </div>
+            </motion.div>
+          )}
 
           {/* Categories */}
           <motion.div
@@ -137,6 +185,105 @@ const Marketplace = () => {
               </Button>
             ))}
           </motion.div>
+
+          {/* Featured Products Section */}
+          {!featuredLoading && featuredProducts.length > 0 && selectedCategory === "all" && !searchQuery && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mb-12"
+            >
+              <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
+                <Star className="h-6 w-6 text-primary fill-primary" />
+                Featured Deals
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {featuredProducts.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 * index }}
+                  >
+                    <Card variant="glass" className="group overflow-hidden border-primary/30 hover:border-primary/50 transition-all duration-300 relative">
+                      {/* Featured Badge */}
+                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-xs font-bold py-1 px-3 z-10 text-center">
+                        ⭐ FEATURED DEAL
+                      </div>
+                      {/* Product Image */}
+                      <div className="aspect-square bg-gradient-to-br from-secondary to-muted relative overflow-hidden pt-6">
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Package className="h-16 w-16 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        
+                        {/* Discount Badge */}
+                        {product.original_price && product.original_price > product.price && (
+                          <div className="absolute top-9 left-3 px-2 py-1 rounded bg-destructive text-destructive-foreground text-xs font-display font-bold">
+                            {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% OFF
+                          </div>
+                        )}
+
+                        {/* Quick Add */}
+                        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                          <Button 
+                            variant="hero" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => handleAddToCart(product.id)}
+                            disabled={addingToCart === product.id || product.stock === 0}
+                          >
+                            {addingToCart === product.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : product.stock === 0 ? (
+                              "Out of Stock"
+                            ) : (
+                              <>
+                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                Add to Cart
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-4">
+                        <p className="text-xs text-primary font-display uppercase tracking-wider mb-1">
+                          {product.brand}
+                        </p>
+                        <h3 className="font-medium text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-display font-bold text-lg text-primary">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.original_price && product.original_price > product.price && (
+                            <span className="text-sm text-muted-foreground line-through">
+                              {formatPrice(product.original_price)}
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* All Products Header */}
+          {selectedCategory === "all" && !searchQuery && featuredProducts.length > 0 && !featuredLoading && (
+            <h2 className="font-display text-2xl font-bold mb-6">All Products</h2>
+          )}
 
           {/* Loading State */}
           {loading && (
