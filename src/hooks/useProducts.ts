@@ -36,20 +36,22 @@ export function useProducts(category?: string, searchQuery?: string) {
         }
 
         if (searchQuery) {
-          query = query.or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`);
+          query = query.or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
         }
 
         const { data, error } = await query;
 
         if (error) throw error;
-        setProducts(data || []);
+        setProducts((data as Product[]) || []);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     }
 
+    setLoading(true);
     fetchProducts();
   }, [category, searchQuery]);
 
