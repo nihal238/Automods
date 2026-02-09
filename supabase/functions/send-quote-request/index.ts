@@ -149,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "AutoMods <onboarding@resend.dev>",
-      to: ["nihalthumar1999@gmail.com"],
+      to: ["alikhanalikhan2308@gmail.com"],
       subject: subject,
       html: emailHtml,
     });
