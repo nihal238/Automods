@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Menu, X, User, ShoppingCart, LogOut, Store, Shield, Package, Heart } from "lucide-react";
+import { Menu, X, Car, User, ShoppingCart, LogOut, Store, Shield, Package, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import AutoModsLogo from "@/components/AutoModsLogo";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
