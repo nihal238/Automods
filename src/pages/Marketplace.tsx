@@ -233,18 +233,16 @@ const Marketplace = () => {
           )}
 
           {/* Categories */}
-          {!showFavorites && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
-              {categories.map((category) => (
-                <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
-                  {category.name}
-                </Button>
-              ))}
-            </motion.div>
-          )}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
+            {categories.map((category) => (
+              <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
+                {category.name}
+              </Button>
+            ))}
+          </motion.div>
 
           {/* Featured Products Section */}
-          {!showFavorites && !featuredLoading && featuredProducts.length > 0 && selectedCategory === "all" && !searchQuery && (
+          {!featuredLoading && featuredProducts.length > 0 && selectedCategory === "all" && !searchQuery && !showFavorites && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mb-12">
               <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
                 <Star className="h-6 w-6 text-primary fill-primary" />
@@ -260,7 +258,7 @@ const Marketplace = () => {
           {showFavorites ? (
             <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
               <Heart className="h-6 w-6 text-primary fill-primary" />
-              Your Favorites
+              Your Favorites {selectedCategory !== "all" ? `— ${categories.find(c => c.id === selectedCategory)?.name}` : ''}
             </h2>
           ) : selectedCategory === "all" && !searchQuery && featuredProducts.length > 0 && !featuredLoading ? (
             <h2 className="font-display text-2xl font-bold mb-6">All Products</h2>
