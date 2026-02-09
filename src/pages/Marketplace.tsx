@@ -233,15 +233,13 @@ const Marketplace = () => {
           )}
 
           {/* Categories */}
-          {!showFavorites && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
-              {categories.map((category) => (
-                <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
-                  {category.name}
-                </Button>
-              ))}
-            </motion.div>
-          )}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
+            {categories.map((category) => (
+              <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
+                {category.name}
+              </Button>
+            ))}
+          </motion.div>
 
           {/* Featured Products Section */}
           {!showFavorites && !featuredLoading && featuredProducts.length > 0 && selectedCategory === "all" && !searchQuery && (
