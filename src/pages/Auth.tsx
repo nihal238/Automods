@@ -315,9 +315,13 @@ const Auth = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         
         <div className="relative z-10 flex flex-col justify-center px-16">
-          <div className="mb-12">
-            <AutoModsLogo size="lg" />
-          </div>
+          <Link to="/" className="flex items-center gap-3 mb-12">
+            <Car className="h-10 w-10 text-primary" />
+            <span className="font-display text-2xl font-bold tracking-wider">
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
+            </span>
+          </Link>
 
           <motion.h1
             initial={{ opacity: 0, x: -30 }}
