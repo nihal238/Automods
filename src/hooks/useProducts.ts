@@ -16,7 +16,10 @@ interface Product {
   rating: number;
   review_count: number;
   is_active: boolean;
+  created_at?: string;
 }
+
+export type SortOption = "newest" | "price_asc" | "price_desc" | "rating";
 
 export interface ProductFilters {
   category?: string;
@@ -24,6 +27,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   featured?: boolean;
+  sort?: SortOption;
 }
 
 export function useProducts(filters?: ProductFilters) {
@@ -31,29 +35,37 @@ export function useProducts(filters?: ProductFilters) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     async function fetchProducts() {
       try {
+        const sort = filters?.sort || "newest";
+        let orderCol = "created_at";
+        let asc = false;
+        if (sort === "price_asc") { orderCol = "price"; asc = true; }
+        else if (sort === "price_desc") { orderCol = "price"; asc = false; }
+        else if (sort === "rating") { orderCol = "rating"; asc = false; }
+
         let query = supabase
           .from("products")
           .select("*")
           .eq("is_active", true)
-          .order("created_at", { ascending: false });
+          .order(orderCol, { ascending: asc });
 
         const category = filters?.category;
         const searchQuery = filters?.searchQuery;
         const minPrice = filters?.minPrice;
         const maxPrice = filters?.maxPrice;
-        const featured = filters?.featured;
 
         if (category && category !== "all") {
           query = query.eq("category", category);
         }
 
-        if (searchQuery) {
-          query = query.or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+        if (searchQuery && searchQuery.trim()) {
+          const q = searchQuery.trim();
+          query = query.or(`name.ilike.%${q}%,brand.ilike.%${q}%,description.ilike.%${q}%`);
         }
 
-        if (minPrice !== undefined) {
+        if (minPrice !== undefined && minPrice > 0) {
           query = query.gte("price", minPrice);
         }
 
@@ -61,13 +73,7 @@ export function useProducts(filters?: ProductFilters) {
           query = query.lte("price", maxPrice);
         }
 
-        // Featured products: has discount (original_price > price) or high rating
-        if (featured) {
-          query = query.or("original_price.gt.price,rating.gte.4");
-        }
-
         const { data, error } = await query;
-
         if (error) throw error;
         setProducts((data as Product[]) || []);
       } catch (error) {
@@ -78,9 +84,8 @@ export function useProducts(filters?: ProductFilters) {
       }
     }
 
-    setLoading(true);
     fetchProducts();
-  }, [filters?.category, filters?.searchQuery, filters?.minPrice, filters?.maxPrice, filters?.featured]);
+  }, [filters?.category, filters?.searchQuery, filters?.minPrice, filters?.maxPrice, filters?.featured, filters?.sort]);
 
   return { products, loading };
 }
@@ -92,7 +97,6 @@ export function useFeaturedProducts() {
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        // Get products with discounts (original_price > price)
         const { data, error } = await supabase
           .from("products")
           .select("*")
@@ -102,12 +106,9 @@ export function useFeaturedProducts() {
           .limit(4);
 
         if (error) throw error;
-        
-        // Filter to only those with actual discounts
         const discounted = (data as Product[] || []).filter(
           p => p.original_price && p.original_price > p.price
         );
-        
         setProducts(discounted);
       } catch (error) {
         console.error("Error fetching featured products:", error);
