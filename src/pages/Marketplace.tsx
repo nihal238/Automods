@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2, Package, ArrowUpDown } from "lucide-react";
+import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2, Package, ArrowUpDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProducts, useFeaturedProducts, type SortOption } from "@/hooks/useProducts";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Slider } from "@/components/ui/slider";
