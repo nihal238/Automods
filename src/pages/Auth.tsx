@@ -59,6 +59,26 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      if (view === "reset-password") {
+        if (newPassword.length < 6) {
+          toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
+          return;
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          toast({ title: "Error", description: error.message, variant: "destructive" });
+        } else {
+          toast({ title: "Password Updated!", description: "Your password has been reset successfully." });
+          setView("login");
+          navigate("/auth");
+        }
+        return;
+      }
+
       if (view === "forgot-password") {
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
           redirectTo: `${window.location.origin}/auth?reset=true`,
