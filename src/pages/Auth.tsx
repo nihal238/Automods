@@ -23,6 +23,8 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"customer" | "seller">("customer");
   const [loading, setLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
