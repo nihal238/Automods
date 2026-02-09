@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Menu, X, Car, User, ShoppingCart, LogOut, Store, Shield, Package } from "lucide-react";
+import { Menu, X, User, ShoppingCart, LogOut, Store, Shield, Package, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import AutoModsLogo from "@/components/AutoModsLogo";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,16 +28,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <Car className="h-8 w-8 text-primary transition-all duration-300 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-            <span className="font-display text-xl font-bold tracking-wider">
-              <span className="text-primary">AUTO</span>
-              <span className="text-foreground">MODS</span>
-            </span>
-          </Link>
+          <AutoModsLogo size="sm" />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
@@ -63,6 +55,12 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            <Link to="/marketplace?favorites=true">
+              <Button variant="ghost" size="icon">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
