@@ -55,6 +55,12 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            <Link to="/marketplace?favorites=true">
+              <Button variant="ghost" size="icon">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
