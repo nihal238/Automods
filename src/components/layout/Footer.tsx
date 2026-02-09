@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Car, Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import AutoModsLogo from "@/components/AutoModsLogo";
 
 const Footer = () => {
   const quickLinks = [
