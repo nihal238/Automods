@@ -64,7 +64,7 @@ const Header = () => {
           {/* Actions */}
           <div className="flex items-center gap-3">
             <Link to="/marketplace?favorites=true">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="relative">
                 <Heart className="h-5 w-5" />
               </Button>
             </Link>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2, Package, ArrowUpDown } from "lucide-react";
+import { Search, Filter, Star, ShoppingCart, Heart, ChevronDown, Loader2, Package, ArrowUpDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,25 +9,32 @@ import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProducts, useFeaturedProducts, type SortOption } from "@/hooks/useProducts";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Marketplace = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [showFavorites, setShowFavorites] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(searchParams.get("favorites") === "true");
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toggleWishlist, isInWishlist, wishlistCount } = useWishlist();
 
+  // Sync favorites state with URL params
+  useEffect(() => {
+    if (searchParams.get("favorites") === "true") {
+      setShowFavorites(true);
+    }
+  }, [searchParams]);
   const { products, loading } = useProducts({
     category: selectedCategory,
     searchQuery: searchQuery.trim(),
@@ -181,8 +188,8 @@ const Marketplace = () => {
             </p>
           </motion.div>
 
-          {/* Search, Sort & Filter Bar */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col md:flex-row gap-4 mb-8">
+          {/* Search & Filter Toggle */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input type="text" placeholder="Search parts, brands..." className="pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -204,42 +211,93 @@ const Marketplace = () => {
               Filters
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
-            <Button
-              variant={showFavorites ? "default" : "outline"}
-              className="gap-2"
-              onClick={() => {
-                if (!user) { toast({ title: "Please sign in", variant: "destructive" }); navigate("/auth"); return; }
-                setShowFavorites(!showFavorites);
-              }}
-            >
-              <Heart className={`h-4 w-4 ${showFavorites ? 'fill-current' : ''}`} />
-              Favorites{wishlistCount > 0 ? ` (${wishlistCount})` : ''}
-            </Button>
           </motion.div>
 
-          {/* Price Filter Panel */}
+          {/* Unified Filter Panel */}
           {showFilters && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-6 p-4 rounded-lg bg-card border border-border">
-              <h3 className="font-medium mb-4">Price Range</h3>
-              <div className="space-y-4">
-                <Slider value={priceRange} onValueChange={(value) => setPriceRange(value as [number, number])} min={0} max={10000000} step={10000} className="w-full" />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{formatPrice(priceRange[0])}</span>
-                  <span>{formatPrice(priceRange[1])}</span>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-8 p-5 rounded-xl bg-card border border-border space-y-6">
+              {/* Category Filter */}
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-3">Category</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {categories.map((category) => (
+                    <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
+                      {category.name}
+                    </Button>
+                  ))}
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setPriceRange([0, 10000000])}>Reset Price</Button>
               </div>
+
+              {/* Price Range */}
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-3">Price Range</h3>
+                <div className="space-y-3 max-w-lg">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={(value) => setPriceRange(value as [number, number])}
+                    min={0}
+                    max={10000000}
+                    step={5000}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>{formatPrice(priceRange[0])}</span>
+                    <span>{formatPrice(priceRange[1])}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Favorites Toggle */}
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-3">Favorites</h3>
+                <Button
+                  variant={showFavorites ? "default" : "secondary"}
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    if (!user) { toast({ title: "Please sign in", variant: "destructive" }); navigate("/auth"); return; }
+                    setShowFavorites(!showFavorites);
+                  }}
+                >
+                  <Heart className={`h-4 w-4 ${showFavorites ? 'fill-current' : ''}`} />
+                  {showFavorites ? "Showing Favorites" : "Show Favorites Only"}
+                </Button>
+              </div>
+
+              {/* Reset All */}
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                setSelectedCategory("all");
+                setPriceRange([0, 10000000]);
+                setShowFavorites(false);
+                setSearchQuery("");
+                setSortBy("newest");
+              }}>
+                <X className="h-4 w-4" />
+                Reset All Filters
+              </Button>
             </motion.div>
           )}
 
-          {/* Categories */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
-            {categories.map((category) => (
-              <Button key={category.id} variant={selectedCategory === category.id ? "default" : "secondary"} size="sm" onClick={() => setSelectedCategory(category.id)} className="whitespace-nowrap">
-                {category.name}
-              </Button>
-            ))}
-          </motion.div>
+          {/* Active filter chips */}
+          {(selectedCategory !== "all" || showFavorites || priceRange[0] > 0 || priceRange[1] < 10000000) && !showFilters && (
+            <div className="flex gap-2 flex-wrap mb-6">
+              {selectedCategory !== "all" && (
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setSelectedCategory("all")}>
+                  {categories.find(c => c.id === selectedCategory)?.name} <X className="h-3 w-3" />
+                </Button>
+              )}
+              {showFavorites && (
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setShowFavorites(false)}>
+                  <Heart className="h-3 w-3 fill-current" /> Favorites <X className="h-3 w-3" />
+                </Button>
+              )}
+              {(priceRange[0] > 0 || priceRange[1] < 10000000) && (
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setPriceRange([0, 10000000])}>
+                  {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])} <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Featured Products Section */}
           {!featuredLoading && featuredProducts.length > 0 && selectedCategory === "all" && !searchQuery && !showFavorites && (
