@@ -148,8 +148,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to:", adminEmail);
 
     const emailResponse = await resend.emails.send({
-      from: "CarMods <onboarding@resend.dev>",
-      to: [adminEmail],
+      from: "AutoMods <onboarding@resend.dev>",
+      to: ["nihalthumar1999@gmail.com"],
       subject: subject,
       html: emailHtml,
     });
