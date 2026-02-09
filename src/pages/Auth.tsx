@@ -16,13 +16,15 @@ const authSchema = z.object({
   name: z.string().trim().min(1, "Name is required").optional(),
 });
 
-type AuthView = "login" | "signup" | "forgot-password";
+type AuthView = "login" | "signup" | "forgot-password" | "reset-password";
 
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"customer" | "seller">("customer");
   const [loading, setLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,16 +35,50 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    // Check if user arrived via password reset link
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "true") {
+      // Listen for the PASSWORD_RECOVERY event
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setView("reset-password");
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user && view !== "reset-password") {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, view]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      if (view === "reset-password") {
+        if (newPassword.length < 6) {
+          toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast({ title: "Error", description: "Passwords do not match", variant: "destructive" });
+          return;
+        }
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          toast({ title: "Error", description: error.message, variant: "destructive" });
+        } else {
+          toast({ title: "Password Updated!", description: "Your password has been reset successfully." });
+          setView("login");
+          navigate("/auth");
+        }
+        return;
+      }
+
       if (view === "forgot-password") {
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
           redirectTo: `${window.location.origin}/auth?reset=true`,
@@ -143,6 +179,57 @@ const Auth = () => {
   };
 
   const renderForm = () => {
+    if (view === "reset-password") {
+      return (
+        <>
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl">Set New Password</CardTitle>
+            <CardDescription>
+              Enter your new password below
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="New Password"
+                  className="pl-10 pr-10"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm New Password"
+                  className="pl-10"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <Button type="submit" variant="hero" className="w-full" disabled={loading}>
+                {loading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          </CardContent>
+        </>
+      );
+    }
+
     if (view === "forgot-password") {
       return (
         <>
