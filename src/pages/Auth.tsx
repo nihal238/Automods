@@ -16,7 +16,7 @@ const authSchema = z.object({
   name: z.string().trim().min(1, "Name is required").optional(),
 });
 
-type AuthView = "login" | "signup" | "forgot-password";
+type AuthView = "login" | "signup" | "forgot-password" | "reset-password";
 
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
