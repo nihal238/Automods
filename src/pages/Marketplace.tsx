@@ -29,6 +29,12 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const { toggleWishlist, isInWishlist, wishlistCount } = useWishlist();
 
+  // Sync favorites state with URL params
+  useEffect(() => {
+    if (searchParams.get("favorites") === "true") {
+      setShowFavorites(true);
+    }
+  }, [searchParams]);
   const { products, loading } = useProducts({
     category: selectedCategory,
     searchQuery: searchQuery.trim(),
