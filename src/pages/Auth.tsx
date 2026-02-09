@@ -35,10 +35,24 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    // Check if user arrived via password reset link
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "true") {
+      // Listen for the PASSWORD_RECOVERY event
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setView("reset-password");
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user && view !== "reset-password") {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, view]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
