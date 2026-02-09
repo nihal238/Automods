@@ -375,9 +375,13 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           {/* Mobile Logo */}
-          <div className="flex lg:hidden justify-center mb-8">
-            <AutoModsLogo size="md" />
-          </div>
+          <Link to="/" className="flex lg:hidden items-center gap-2 justify-center mb-8">
+            <Car className="h-8 w-8 text-primary" />
+            <span className="font-display text-xl font-bold tracking-wider">
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
+            </span>
+          </Link>
 
           <Card variant="glass" className="border-border/30">
             {renderForm()}
