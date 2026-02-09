@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import AutoModsLogo from "@/components/AutoModsLogo";
+import { Car, Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   const quickLinks = [
@@ -25,7 +24,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <AutoModsLogo size="md" />
+            <Link to="/" className="flex items-center gap-2">
+              <Car className="h-8 w-8 text-primary" />
+              <span className="font-display text-xl font-bold tracking-wider">
+                <span className="text-primary">AUTO</span>
+                <span className="text-foreground">MODS</span>
+              </span>
+            </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               India's premier car modification platform. Transform your ride with custom parts, 
               3D visualization, and expert modifications with Automods.

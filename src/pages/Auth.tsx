@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import AutoModsLogo from "@/components/AutoModsLogo";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Car, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -316,9 +315,13 @@ const Auth = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         
         <div className="relative z-10 flex flex-col justify-center px-16">
-          <div className="mb-12">
-            <AutoModsLogo size="lg" />
-          </div>
+          <Link to="/" className="flex items-center gap-3 mb-12">
+            <Car className="h-10 w-10 text-primary" />
+            <span className="font-display text-2xl font-bold tracking-wider">
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
+            </span>
+          </Link>
 
           <motion.h1
             initial={{ opacity: 0, x: -30 }}
@@ -372,9 +375,13 @@ const Auth = () => {
           className="w-full max-w-md"
         >
           {/* Mobile Logo */}
-          <div className="flex lg:hidden justify-center mb-8">
-            <AutoModsLogo size="md" />
-          </div>
+          <Link to="/" className="flex lg:hidden items-center gap-2 justify-center mb-8">
+            <Car className="h-8 w-8 text-primary" />
+            <span className="font-display text-xl font-bold tracking-wider">
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
+            </span>
+          </Link>
 
           <Card variant="glass" className="border-border/30">
             {renderForm()}
