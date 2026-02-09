@@ -27,7 +27,16 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <AutoModsLogo size="sm" />
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="relative">
+              <Car className="h-8 w-8 text-primary transition-all duration-300 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-wider">
+              <span className="text-primary">AUTO</span>
+              <span className="text-foreground">MODS</span>
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
