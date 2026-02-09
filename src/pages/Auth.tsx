@@ -35,17 +35,22 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user arrived via password reset link
+    // Check if user arrived via password reset link by inspecting URL hash
+    const hash = window.location.hash;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("reset") === "true") {
-      // Listen for the PASSWORD_RECOVERY event
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-        if (event === "PASSWORD_RECOVERY") {
-          setView("reset-password");
-        }
-      });
-      return () => subscription.unsubscribe();
+    const isRecovery = hash.includes("type=recovery") || params.get("reset") === "true";
+    
+    if (isRecovery) {
+      setView("reset-password");
     }
+
+    // Also listen for the PASSWORD_RECOVERY event as a fallback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setView("reset-password");
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
