@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import DummyPaymentModal from "@/components/DummyPaymentModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,70 +20,57 @@ const Cart = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
 
-  const handleCheckout = async () => {
+  const validateFields = () => {
     if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to checkout",
-        variant: "destructive",
-      });
+      toast({ title: "Please sign in", description: "You need to be signed in to checkout", variant: "destructive" });
       navigate("/auth");
-      return;
+      return false;
     }
-
     if (!fullName.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter your full name",
-        variant: "destructive",
-      });
-      return;
+      toast({ title: "Name required", description: "Please enter your full name", variant: "destructive" });
+      return false;
     }
-
     if (!phone.trim() || phone.length < 10) {
-      toast({
-        title: "Valid phone number required",
-        description: "Please enter a valid 10-digit mobile number",
-        variant: "destructive",
-      });
-      return;
+      toast({ title: "Valid phone number required", description: "Please enter a valid 10-digit mobile number", variant: "destructive" });
+      return false;
     }
-
     if (!address.trim()) {
-      toast({
-        title: "Address required",
-        description: "Please enter your complete shipping address",
-        variant: "destructive",
-      });
-      return;
+      toast({ title: "Address required", description: "Please enter your complete shipping address", variant: "destructive" });
+      return false;
     }
-
     if (!pincode.trim() || pincode.length !== 6) {
-      toast({
-        title: "Valid pincode required",
-        description: "Please enter a valid 6-digit pincode",
-        variant: "destructive",
-      });
-      return;
+      toast({ title: "Valid pincode required", description: "Please enter a valid 6-digit pincode", variant: "destructive" });
+      return false;
     }
+    return true;
+  };
 
-    const shippingAddress = `${fullName}\n${address}\nPincode: ${pincode}`;
+  const handleCheckout = () => {
+    if (!validateFields()) return;
+    setShowPayment(true);
+  };
 
+  const handlePaymentSuccess = async () => {
+    setShowPayment(false);
+    setCheckoutLoading(true);
+
+    const shippingAddr = `${fullName}\n${address}\nPincode: ${pincode}`;
     try {
       // Create order
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
-          user_id: user.id,
+          user_id: user!.id,
           total_amount: totalAmount,
-          shipping_address: shippingAddress,
+          shipping_address: shippingAddr,
           phone: phone,
-          status: "pending",
+          status: "paid",
         })
         .select()
         .single();
@@ -199,9 +187,9 @@ const Cart = () => {
                   >
                     <Card variant="glass">
                       <CardContent className="p-4">
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                           {/* Product Image */}
-                          <div className="w-24 h-24 bg-gradient-to-br from-secondary to-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-secondary to-muted rounded-lg flex items-center justify-center flex-shrink-0">
                             {item.product.image_url ? (
                               <img
                                 src={item.product.image_url}
@@ -222,7 +210,7 @@ const Cart = () => {
                             </p>
                             <h3 className="font-medium mb-2">{item.product.name}</h3>
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
                               {/* Quantity Controls */}
                               <div className="flex items-center gap-2">
                                 <Button
@@ -371,6 +359,13 @@ const Cart = () => {
       </main>
 
       <Footer />
+
+      <DummyPaymentModal
+        open={showPayment}
+        onOpenChange={setShowPayment}
+        amount={totalAmount}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };

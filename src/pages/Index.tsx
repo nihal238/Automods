@@ -119,7 +119,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl font-bold leading-tight mb-6"
+              className="font-display text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6"
             >
               <span className="text-foreground">Transform Your</span>
               <br />
@@ -160,7 +160,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex gap-8 mt-12 pt-8 border-t border-border/30"
+              className="flex flex-wrap gap-6 sm:gap-8 mt-12 pt-8 border-t border-border/30"
             >
               {[
                 { value: "50+", label: "Car Models" },
@@ -168,7 +168,7 @@ const Index = () => {
                 { value: "500+", label: "Happy Customers" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <div className="font-display text-3xl font-bold text-primary">{stat.value}</div>
+                  <div className="font-display text-2xl sm:text-3xl font-bold text-primary">{stat.value}</div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               ))}
