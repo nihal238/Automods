@@ -36,7 +36,7 @@ function LoadingFallback() {
 function Scene({ customization, autoRotate }: RealisticCustomizerSceneProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[5.5, 2.2, 5.5]} fov={42} />
+      <PerspectiveCamera makeDefault position={[5, 2, 5]} fov={44} />
       <OrbitControls
         enablePan={true}
         enableZoom={true}
@@ -48,7 +48,7 @@ function Scene({ customization, autoRotate }: RealisticCustomizerSceneProps) {
         enableDamping
         rotateSpeed={0.5}
         zoomSpeed={0.8}
-        target={[0, 0.7, 0]}
+        target={[0, 0.5, 0]}
       />
       
       {/* Studio Lighting */}
@@ -107,7 +107,7 @@ const RealisticCustomizerScene = forwardRef<RealisticCustomizerSceneRef, Realist
           toneMappingExposure: 1.2,
         }}
         dpr={[1, 2]}
-        camera={{ position: [5.5, 2.2, 5.5], fov: 42 }}
+        camera={{ position: [5, 2, 5], fov: 44 }}
       >
         <color attach="background" args={["#0a0a12"]} />
         <Suspense fallback={<LoadingFallback />}>

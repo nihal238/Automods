@@ -15,10 +15,10 @@ interface RealisticCarModelProps {
 
 // Enhanced wheel configurations with realistic materials
 const wheelConfigs = {
-  standard: { spokes: 6, rimColor: "#666666", hubColor: "#333333", size: 0.38, thickness: 0.24 },
-  sport: { spokes: 10, rimColor: "#1a1a1a", hubColor: "#ff0000", size: 0.40, thickness: 0.26 },
-  luxury: { spokes: 12, rimColor: "#c0c0c0", hubColor: "#d4af37", size: 0.42, thickness: 0.22 },
-  offroad: { spokes: 5, rimColor: "#2a2a2a", hubColor: "#4a4a4a", size: 0.45, thickness: 0.32 },
+  standard: { spokes: 6, rimColor: "#666666", hubColor: "#333333", size: 0.34, thickness: 0.22 },
+  sport: { spokes: 10, rimColor: "#1a1a1a", hubColor: "#ff0000", size: 0.35, thickness: 0.24 },
+  luxury: { spokes: 12, rimColor: "#c0c0c0", hubColor: "#d4af37", size: 0.36, thickness: 0.20 },
+  offroad: { spokes: 5, rimColor: "#2a2a2a", hubColor: "#4a4a4a", size: 0.40, thickness: 0.28 },
 };
 
 // Headlight configurations with realistic glow
@@ -50,72 +50,93 @@ const decalColors = {
 function Wheel({ position, config, rotation = 0 }: { position: [number, number, number], config: typeof wheelConfigs.standard, rotation?: number }) {
   const wheelRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (wheelRef.current) {
-      // Subtle wheel spin effect
       wheelRef.current.rotation.x += 0.02;
     }
   });
 
+  const tireRadius = config.size;
+  const rimRadius = config.size * 0.68;
+  const tireWidth = config.thickness;
+
   return (
-    <group position={position} ref={wheelRef}>
-      {/* Tire - Main rubber */}
-      <mesh rotation={[Math.PI / 2, 0, rotation]}>
-        <torusGeometry args={[config.size, config.thickness * 0.4, 32, 64]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.9} metalness={0.1} />
-      </mesh>
+    <group position={position}>
+      <group ref={wheelRef} rotation={[Math.PI / 2, 0, rotation]}>
+        {/* Outer tire */}
+        <mesh>
+          <cylinderGeometry args={[tireRadius, tireRadius, tireWidth, 48]} />
+          <meshStandardMaterial color="#1a1a1a" roughness={0.92} metalness={0.05} />
+        </mesh>
+        
+        {/* Tire sidewall inner ring left */}
+        <mesh position={[0, tireWidth / 2, 0]}>
+          <ringGeometry args={[rimRadius + 0.02, tireRadius, 48]} />
+          <meshStandardMaterial color="#222222" roughness={0.85} metalness={0.05} />
+        </mesh>
+        {/* Tire sidewall inner ring right */}
+        <mesh position={[0, -tireWidth / 2, 0]} rotation={[Math.PI, 0, 0]}>
+          <ringGeometry args={[rimRadius + 0.02, tireRadius, 48]} />
+          <meshStandardMaterial color="#222222" roughness={0.85} metalness={0.05} />
+        </mesh>
+        
+        {/* Rim */}
+        <mesh>
+          <cylinderGeometry args={[rimRadius, rimRadius, tireWidth + 0.02, config.spokes * 2]} />
+          <meshPhysicalMaterial 
+            color={config.rimColor} 
+            metalness={0.98} 
+            roughness={0.08}
+            clearcoat={1}
+            clearcoatRoughness={0.05}
+          />
+        </mesh>
+        
+        {/* Rim face / hub */}
+        <mesh position={[0, tireWidth / 2 + 0.01, 0]}>
+          <circleGeometry args={[rimRadius, config.spokes * 2]} />
+          <meshPhysicalMaterial 
+            color={config.rimColor} 
+            metalness={0.95} 
+            roughness={0.1}
+            clearcoat={0.8}
+          />
+        </mesh>
+        
+        {/* Center hub cap */}
+        <mesh position={[0, tireWidth / 2 + 0.02, 0]}>
+          <cylinderGeometry args={[0.1, 0.1, 0.04, 32]} />
+          <meshPhysicalMaterial 
+            color={config.hubColor} 
+            metalness={0.95} 
+            roughness={0.15}
+            clearcoat={0.8}
+          />
+        </mesh>
+        
+        {/* Lug nuts */}
+        {Array.from({ length: 5 }).map((_, i) => {
+          const angle = (i / 5) * Math.PI * 2;
+          const lx = Math.cos(angle) * 0.065;
+          const lz = Math.sin(angle) * 0.065;
+          return (
+            <mesh key={i} position={[lx, tireWidth / 2 + 0.025, lz]}>
+              <cylinderGeometry args={[0.012, 0.012, 0.02, 6]} />
+              <meshStandardMaterial color="#999999" metalness={0.9} roughness={0.2} />
+            </mesh>
+          );
+        })}
+        
+        {/* Brake disc */}
+        <mesh>
+          <cylinderGeometry args={[rimRadius * 0.75, rimRadius * 0.75, 0.04, 48]} />
+          <meshStandardMaterial color="#444444" metalness={0.8} roughness={0.35} />
+        </mesh>
+      </group>
       
-      {/* Tire sidewall */}
-      <mesh rotation={[Math.PI / 2, 0, rotation]}>
-        <cylinderGeometry args={[config.size + 0.02, config.size + 0.02, config.thickness, 64]} />
-        <meshStandardMaterial color="#222222" roughness={0.85} metalness={0.05} />
-      </mesh>
-      
-      {/* Rim - Alloy wheel */}
-      <mesh rotation={[Math.PI / 2, 0, rotation]}>
-        <cylinderGeometry args={[config.size * 0.7, config.size * 0.7, config.thickness + 0.02, config.spokes * 2]} />
-        <meshPhysicalMaterial 
-          color={config.rimColor} 
-          metalness={0.98} 
-          roughness={0.1}
-          clearcoat={1}
-          clearcoatRoughness={0.05}
-        />
-      </mesh>
-      
-      {/* Hub cap */}
-      <mesh rotation={[Math.PI / 2, 0, rotation]} position={[0, 0.14, 0]}>
-        <cylinderGeometry args={[0.12, 0.12, 0.04, 32]} />
-        <meshPhysicalMaterial 
-          color={config.hubColor} 
-          metalness={0.95} 
-          roughness={0.15}
-          clearcoat={0.8}
-        />
-      </mesh>
-      
-      {/* Lug nuts */}
-      {Array.from({ length: 5 }).map((_, i) => {
-        const angle = (i / 5) * Math.PI * 2;
-        const x = Math.cos(angle) * 0.08;
-        const z = Math.sin(angle) * 0.08;
-        return (
-          <mesh key={i} position={[z, 0.15, x]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.015, 0.015, 0.02, 6]} />
-            <meshStandardMaterial color="#888888" metalness={0.9} roughness={0.2} />
-          </mesh>
-        );
-      })}
-      
-      {/* Brake disc visible through spokes */}
-      <mesh rotation={[Math.PI / 2, 0, rotation]}>
-        <cylinderGeometry args={[config.size * 0.55, config.size * 0.55, 0.06, 48]} />
-        <meshStandardMaterial color="#404040" metalness={0.8} roughness={0.3} />
-      </mesh>
-      
-      {/* Brake caliper */}
-      <mesh position={[0, 0, config.size * 0.4]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[0.08, 0.15, 0.12]} />
+      {/* Brake caliper (doesn't spin) */}
+      <mesh position={[0, 0, config.size * 0.35]}>
+        <boxGeometry args={[0.07, 0.12, 0.1]} />
         <meshStandardMaterial color="#cc0000" metalness={0.6} roughness={0.4} />
       </mesh>
     </group>
@@ -140,8 +161,8 @@ function CarBody({ bodyColor, ppfType, bumperType }: { bodyColor: string, ppfTyp
   return (
     <group>
       {/* Main Body Shell - Lower */}
-      <mesh position={[0, 0.45, 0]}>
-        <boxGeometry args={[3.4, 0.6, 1.6]} />
+      <mesh position={[0, 0.42, 0]}>
+        <boxGeometry args={[3.4, 0.5, 1.6]} />
         {bodyMaterial}
       </mesh>
       
@@ -648,14 +669,14 @@ export function RealisticCarModel({
   });
 
   const wheelPositions: [number, number, number][] = [
-    [-1.0, 0.48, 0.78],
-    [-1.0, 0.48, -0.78],
-    [1.0, 0.48, 0.78],
-    [1.0, 0.48, -0.78],
+    [-1.0, wheelConfig.size, 0.78],
+    [-1.0, wheelConfig.size, -0.78],
+    [1.0, wheelConfig.size, 0.78],
+    [1.0, wheelConfig.size, -0.78],
   ];
 
   return (
-    <group ref={groupRef} position={[0, 0.05, 0]}>
+    <group ref={groupRef} position={[0, 0.0, 0]}>
       <CarBody bodyColor={bodyColor} ppfType={ppfType} bumperType={bumperType} />
       <Windows />
       <Headlights config={headlightConfig} />
