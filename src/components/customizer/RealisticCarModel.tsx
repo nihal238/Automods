@@ -127,12 +127,6 @@ function Wheel({ position, config, rotation = 0 }: { position: [number, number, 
           <meshStandardMaterial color="#444444" metalness={0.8} roughness={0.35} />
         </mesh>
       </group>
-      
-      {/* Brake caliper (doesn't spin) */}
-      <mesh position={[0, 0, config.size * 0.35]}>
-        <boxGeometry args={[0.07, 0.12, 0.1]} />
-        <meshStandardMaterial color="#cc0000" metalness={0.6} roughness={0.4} />
-      </mesh>
     </group>
   );
 }
