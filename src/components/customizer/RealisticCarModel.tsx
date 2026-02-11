@@ -648,14 +648,14 @@ export function RealisticCarModel({
   });
 
   const wheelPositions: [number, number, number][] = [
-    [-1.0, 0.05, 0.78],
-    [-1.0, 0.05, -0.78],
-    [1.0, 0.05, 0.78],
-    [1.0, 0.05, -0.78],
+    [-1.0, 0.38, 0.78],
+    [-1.0, 0.38, -0.78],
+    [1.0, 0.38, 0.78],
+    [1.0, 0.38, -0.78],
   ];
 
   return (
-    <group ref={groupRef} position={[0, -0.45, 0]}>
+    <group ref={groupRef} position={[0, -0.15, 0]}>
       <CarBody bodyColor={bodyColor} ppfType={ppfType} bumperType={bumperType} />
       <Windows />
       <Headlights config={headlightConfig} />
