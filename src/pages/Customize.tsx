@@ -282,44 +282,44 @@ const Customize = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] sm:w-auto z-10"
             >
-              <div className="flex flex-wrap justify-center gap-2 sm:flex-nowrap sm:gap-3">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-card/90 backdrop-blur-md border border-border/30">
                 <Button 
                   variant="glass" 
                   size="sm" 
-                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  className="gap-1 text-[11px] px-2.5 py-1.5 sm:text-sm sm:gap-2 sm:px-4 sm:py-2"
                   onClick={handleReset}
                 >
-                  <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Reset
+                  <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Reset</span>
                 </Button>
                 <Button 
                   variant="glass" 
                   size="sm" 
-                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  className="gap-1 text-[11px] px-2.5 py-1.5 sm:text-sm sm:gap-2 sm:px-4 sm:py-2"
                   onClick={handleDownload}
                 >
-                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Download
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Download</span>
                 </Button>
                 <Button 
                   variant="glass" 
                   size="sm" 
-                  className="gap-1.5 text-xs sm:text-sm sm:gap-2" 
+                  className="gap-1 text-[11px] px-2.5 py-1.5 sm:text-sm sm:gap-2 sm:px-4 sm:py-2"
                   onClick={handleShare}
                 >
-                  <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Share
+                  <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Share</span>
                 </Button>
                 <Button 
                   variant="hero" 
                   size="sm" 
-                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  className="gap-1 text-[11px] px-2.5 py-1.5 sm:text-sm sm:gap-2 sm:px-4 sm:py-2"
                   onClick={handlePreview}
                 >
-                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Preview
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Preview</span>
                 </Button>
               </div>
             </motion.div>

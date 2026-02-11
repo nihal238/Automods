@@ -668,15 +668,17 @@ export function RealisticCarModel({
     }
   });
 
+  // Wheels sit on ground: center Y = tire radius so bottom touches y=0
+  const wheelY = wheelConfig.size;
   const wheelPositions: [number, number, number][] = [
-    [-1.0, wheelConfig.size, 0.78],
-    [-1.0, wheelConfig.size, -0.78],
-    [1.0, wheelConfig.size, 0.78],
-    [1.0, wheelConfig.size, -0.78],
+    [-1.0, wheelY, 0.78],
+    [-1.0, wheelY, -0.78],
+    [1.0, wheelY, 0.78],
+    [1.0, wheelY, -0.78],
   ];
 
   return (
-    <group ref={groupRef} position={[0, 0.0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]}>
       <CarBody bodyColor={bodyColor} ppfType={ppfType} bumperType={bumperType} />
       <Windows />
       <Headlights config={headlightConfig} />
