@@ -95,17 +95,17 @@ export function ShowroomEnvironment({ showGrid = true }: ShowroomEnvironmentProp
       <mesh position={[0, 0.005, 6]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[8, 0.05]} />
         <meshStandardMaterial 
-          color="#e63946"
-          emissive="#e63946"
-          emissiveIntensity={0.5}
+          color="#333340"
+          emissive="#333340"
+          emissiveIntensity={0.3}
         />
       </mesh>
       <mesh position={[0, 0.005, -6]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[8, 0.05]} />
         <meshStandardMaterial 
-          color="#e63946"
-          emissive="#e63946"
-          emissiveIntensity={0.5}
+          color="#333340"
+          emissive="#333340"
+          emissiveIntensity={0.3}
         />
       </mesh>
     </group>
