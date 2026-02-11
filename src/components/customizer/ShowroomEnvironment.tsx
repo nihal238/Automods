@@ -49,9 +49,7 @@ export function ShowroomEnvironment({ showGrid = true }: ShowroomEnvironmentProp
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
         <ringGeometry args={[4.9, 5.1, 64]} />
         <meshStandardMaterial 
-          color="#e63946"
-          emissive="#e63946"
-          emissiveIntensity={0.3}
+          color="#333340"
           metalness={0.8}
           roughness={0.2}
         />
