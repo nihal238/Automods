@@ -157,6 +157,22 @@ const Header = () => {
                       </Button>
                     </Link>
                   )}
+                  {(role === "seller" || role === "admin") && (
+                    <Link to="/seller" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Store className="h-4 w-4 mr-2" />
+                        Seller Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                  {role === "admin" && (
+                    <Link to="/admin" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </Button>
+                    </Link>
+                  )}
                   <Button variant="outline" className="w-full mt-2" onClick={() => { signOut(); setIsOpen(false); }}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
