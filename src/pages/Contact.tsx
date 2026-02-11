@@ -34,8 +34,16 @@ const Contact = () => {
     try {
       const validated = contactSchema.parse(formData);
       
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { data: response, error } = await supabase.functions.invoke("send-contact-message", {
+        body: {
+          name: validated.name,
+          email: validated.email,
+          phone: validated.phone || undefined,
+          message: validated.message,
+        },
+      });
+
+      if (error) throw error;
 
       toast({
         title: "Message Sent!",
