@@ -164,25 +164,6 @@ function CarBody({ bodyColor, ppfType, bumperType }: { bodyColor: string, ppfTyp
         {bodyMaterial}
       </mesh>
       
-      {/* Wheel arches - Front */}
-      <mesh position={[-1.0, 0.35, 0.7]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.35, 0.08, 8, 16, Math.PI]} />
-        {bodyMaterial}
-      </mesh>
-      <mesh position={[-1.0, 0.35, -0.7]} rotation={[-Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.35, 0.08, 8, 16, Math.PI]} />
-        {bodyMaterial}
-      </mesh>
-      
-      {/* Wheel arches - Rear */}
-      <mesh position={[1.0, 0.35, 0.7]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.38, 0.08, 8, 16, Math.PI]} />
-        {bodyMaterial}
-      </mesh>
-      <mesh position={[1.0, 0.35, -0.7]} rotation={[-Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.38, 0.08, 8, 16, Math.PI]} />
-        {bodyMaterial}
-      </mesh>
       
       {/* Cabin/Greenhouse */}
       <mesh position={[0.15, 1.0, 0]}>
