@@ -143,8 +143,17 @@ const Contact = () => {
 
               {/* Map placeholder */}
               <Card variant="glass" className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
-                  <MapPin className="h-12 w-12 text-muted-foreground/30" />
+                <div className="aspect-video">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.937!2d72.8296!3d19.1364!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7b63aceef0c69%3A0x2aa80cf2287dfa3b!2sAndheri%20West%2C%20Mumbai%2C%20Maharashtra%20400053!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="AutoMods Location - Andheri West, Mumbai"
+                  />
                 </div>
               </Card>
             </motion.div>
