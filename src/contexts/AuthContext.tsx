@@ -92,18 +92,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsSellerApproved(profileData?.seller_approved ?? false);
       setIsBlocked(profileData?.is_blocked ?? false);
 
-      // If user is blocked, sign them out
-      if (profileData?.is_blocked) {
-        toast.error("Your account has been blocked. Please contact support.");
-        await supabase.auth.signOut();
-        return;
-      }
+      // Check if this is a recovery session - don't sign out during password recovery
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const isRecovery = hash.includes("type=recovery") || params.get("reset") === "true";
 
-      // If seller is not approved, sign them out
-      if (userRole === "seller" && !profileData?.seller_approved) {
-        toast.error("Your seller account is pending approval. Please wait for admin approval.");
-        await supabase.auth.signOut();
-        return;
+      if (!isRecovery) {
+        // If user is blocked, sign them out
+        if (profileData?.is_blocked) {
+          toast.error("Your account has been blocked. Please contact support.");
+          await supabase.auth.signOut();
+          return;
+        }
+
+        // If seller is not approved, sign them out
+        if (userRole === "seller" && !profileData?.seller_approved) {
+          toast.error("Your seller account is pending approval. Please wait for admin approval.");
+          await supabase.auth.signOut();
+          return;
+        }
       }
     } catch (error) {
       console.error("Error fetching user role and status:", error);
