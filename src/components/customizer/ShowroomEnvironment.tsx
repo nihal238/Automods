@@ -161,7 +161,7 @@ export function StudioLighting() {
       <pointLight
         position={[-4, 2, 4]}
         intensity={0.5}
-        color="#ff6b6b"
+        color="#ffffff"
         distance={8}
         decay={2}
       />
