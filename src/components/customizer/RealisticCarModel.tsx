@@ -50,12 +50,6 @@ const decalColors = {
 function Wheel({ position, config, rotation = 0 }: { position: [number, number, number], config: typeof wheelConfigs.standard, rotation?: number }) {
   const wheelRef = useRef<THREE.Group>(null);
 
-  useFrame(() => {
-    if (wheelRef.current) {
-      wheelRef.current.rotation.x += 0.02;
-    }
-  });
-
   const tireRadius = config.size;
   const rimRadius = config.size * 0.68;
   const tireWidth = config.thickness;
