@@ -119,7 +119,7 @@ const Footer = () => {
 
         <div className="border-t border-border/30 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2024 Automods. All rights reserved.
+            © 2024 Automods. All rights reserved. | Created by <span className="text-primary font-semibold">Nihal Thumar</span>
           </p>
           <div className="flex gap-6">
             <Link to="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
