@@ -36,19 +36,19 @@ function LoadingFallback() {
 function Scene({ customization, autoRotate }: RealisticCustomizerSceneProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[6, 2.5, 6]} fov={40} />
+      <PerspectiveCamera makeDefault position={[6, 3, 6]} fov={40} />
       <OrbitControls
         enablePan={true}
         enableZoom={true}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.2}
+        minPolarAngle={Math.PI / 8}
+        maxPolarAngle={Math.PI / 2.05}
         minDistance={4}
         maxDistance={15}
         dampingFactor={0.08}
         enableDamping
         rotateSpeed={0.5}
         zoomSpeed={0.8}
-        target={[0, 0.4, 0]}
+        target={[0, 0.6, 0]}
       />
       
       {/* Studio Lighting */}
@@ -62,11 +62,11 @@ function Scene({ customization, autoRotate }: RealisticCustomizerSceneProps) {
       
       {/* High-quality contact shadows */}
       <ContactShadows 
-        position={[0, 0.001, 0]} 
-        opacity={0.75} 
-        scale={12} 
-        blur={2.5} 
-        far={4}
+        position={[0, 0.01, 0]} 
+        opacity={0.6} 
+        scale={14} 
+        blur={3} 
+        far={5}
         color="#000000"
       />
       
@@ -96,6 +96,7 @@ const RealisticCustomizerScene = forwardRef<RealisticCustomizerSceneRef, Realist
     }));
 
     return (
+      <div className="w-full h-full" style={{ minHeight: '300px' }}>
       <Canvas
         ref={canvasRef}
         shadows
@@ -106,7 +107,7 @@ const RealisticCustomizerScene = forwardRef<RealisticCustomizerSceneRef, Realist
           toneMappingExposure: 1.2,
         }}
         dpr={[1, 2]}
-        camera={{ position: [6, 2.5, 6], fov: 40 }}
+        camera={{ position: [6, 3, 6], fov: 40 }}
       >
         <color attach="background" args={["#0a0a12"]} />
         <Suspense fallback={<LoadingFallback />}>
@@ -116,6 +117,7 @@ const RealisticCustomizerScene = forwardRef<RealisticCustomizerSceneRef, Realist
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />
       </Canvas>
+      </div>
     );
   }
 );
