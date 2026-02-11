@@ -190,9 +190,9 @@ const Customize = () => {
       <Header />
 
       <main className="pt-20">
-        <div className="h-[calc(100vh-5rem)] flex flex-col lg:flex-row">
+        <div className="h-[calc(100vh-5rem)] flex flex-col lg:flex-row overflow-hidden">
           {/* 3D Viewer */}
-          <div className="flex-1 relative bg-[#0a0a12]">
+          <div className="flex-1 relative bg-[#0a0a12] min-h-[50vh] lg:min-h-0">
             <RealisticCustomizerScene
               ref={sceneRef}
               customization={customization}
@@ -200,20 +200,20 @@ const Customize = () => {
             />
 
             {/* Overlay Controls - Top Left */}
-            <div className="absolute top-6 left-6">
+            <div className="absolute top-3 left-3 sm:top-6 sm:left-6 max-w-[60%]">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="px-4 py-3 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
+                className="px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
               >
-                <p className="text-xs text-muted-foreground">Currently Building</p>
-                <p className="font-display font-bold text-lg">
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Currently Building</p>
+                <p className="font-display font-bold text-sm sm:text-lg leading-tight">
                   {selectedBrandData && selectedModelData
                     ? `${selectedBrandData.name} ${selectedModelData.name}`
                     : "Select a car to start"}
                 </p>
                 {hasModifications && (
-                  <p className="text-sm text-primary mt-1">
+                  <p className="text-xs sm:text-sm text-primary mt-1">
                     +{formatPrice(totalPrice)} in mods
                   </p>
                 )}
@@ -221,11 +221,11 @@ const Customize = () => {
             </div>
 
             {/* Viewer Controls - Top Right */}
-            <div className="absolute top-6 right-6 flex flex-col gap-2">
+            <div className="absolute top-3 right-3 sm:top-6 sm:right-6 flex flex-col gap-2">
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col gap-2 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
+                className="hidden sm:flex flex-col gap-2 p-2 rounded-xl bg-card/80 backdrop-blur-md border border-border/30"
               >
                 <Button
                   variant="ghost"
@@ -247,10 +247,25 @@ const Customize = () => {
                   <Move className="h-4 w-4" />
                 </Button>
               </motion.div>
+              {/* Mobile: just rotate toggle */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="sm:hidden p-1.5 rounded-lg bg-card/80 backdrop-blur-md border border-border/30"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setAutoRotate(!autoRotate)}
+                  className="h-8 w-8"
+                >
+                  {autoRotate ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                </Button>
+              </motion.div>
             </div>
 
-            {/* Control hints */}
-            <div className="absolute bottom-24 left-6">
+            {/* Control hints - hidden on mobile */}
+            <div className="absolute bottom-24 left-6 hidden sm:block">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -267,44 +282,46 @@ const Customize = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3"
+              className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto"
             >
-              <Button 
-                variant="glass" 
-                size="sm" 
-                className="gap-2"
-                onClick={handleReset}
-              >
-                <RotateCcw className="h-4 w-4" />
-                Reset
-              </Button>
-              <Button 
-                variant="glass" 
-                size="sm" 
-                className="gap-2"
-                onClick={handleDownload}
-              >
-                <Download className="h-4 w-4" />
-                Download
-              </Button>
-              <Button 
-                variant="glass" 
-                size="sm" 
-                className="gap-2" 
-                onClick={handleShare}
-              >
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
-              <Button 
-                variant="hero" 
-                size="sm" 
-                className="gap-2"
-                onClick={handlePreview}
-              >
-                <Eye className="h-4 w-4" />
-                Preview Build
-              </Button>
+              <div className="flex flex-wrap justify-center gap-2 sm:flex-nowrap sm:gap-3">
+                <Button 
+                  variant="glass" 
+                  size="sm" 
+                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  onClick={handleReset}
+                >
+                  <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Reset
+                </Button>
+                <Button 
+                  variant="glass" 
+                  size="sm" 
+                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  onClick={handleDownload}
+                >
+                  <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Download
+                </Button>
+                <Button 
+                  variant="glass" 
+                  size="sm" 
+                  className="gap-1.5 text-xs sm:text-sm sm:gap-2" 
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Share
+                </Button>
+                <Button 
+                  variant="hero" 
+                  size="sm" 
+                  className="gap-1.5 text-xs sm:text-sm sm:gap-2"
+                  onClick={handlePreview}
+                >
+                  <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Preview
+                </Button>
+              </div>
             </motion.div>
           </div>
 
